@@ -8,11 +8,11 @@
 
 import SwiftUI
 import UIKit
+import Social
 
 struct ContentView: View {
-    @State private var showingShareSheet = false
-    @State private var shareItems: [Any] = []
     @StateObject private var viewModel = StepCountViewModel()
+    @State private var isShowingCompose = false
 
     var body: some View {
         VStack(spacing: 20) {
@@ -41,26 +41,19 @@ struct ContentView: View {
             Text("📊 今日の歩数合計：\(viewModel.stepCount)歩")
                 .font(.headline)
                 .padding()
-
-            Button("Xで投稿（写真付き共有）") {
-                let text = TweetPhraseSelector.message(for: viewModel.stepCount)
-                // Attempt to load the image from the app bundle
-                if let image = UIImage(named: "main") {
-                    shareItems = [text, image]
-                } else {
-                    shareItems = [text]
-                }
-                showingShareSheet = true
+            
+            //X投稿部分
+            Button("X で画像付き投稿") {
+                // 取得した歩数メッセージ
+                let msg = TweetPhraseSelector.message(for: viewModel.stepCount)
+                // main.jpg をバンドルからロード
+                let img = UIImage(named: "main")
+                isShowingCompose = true
             }
-            .padding()
-            .background(viewModel.stepCount > 0 ? Color.orange : Color.gray)
-            .foregroundColor(.white)
-            .cornerRadius(8)
-            .disabled(viewModel.stepCount == 0)
-        }
-        .padding()
-        .sheet(isPresented: $showingShareSheet) {
-            ShareSheet(activityItems: shareItems)
+            .sheet(isPresented: $isShowingCompose) {
+                TwitterComposer(text: TweetPhraseSelector.message(for: viewModel.stepCount),
+                                   image: UIImage(named: "main"))
+            }
         }
         RingView(current: viewModel.stepCount, goal: 10000)
     }
