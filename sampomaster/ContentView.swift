@@ -8,11 +8,11 @@
 
 import SwiftUI
 import UIKit
+import Social
 
 struct ContentView: View {
-    @State private var showingShareSheet = false
-    @State private var shareItems: [Any] = []
     @StateObject private var viewModel = StepCountViewModel()
+    @State private var isShowingCompose = false
 
     var body: some View {
         VStack(spacing: 20) {
@@ -41,26 +41,19 @@ struct ContentView: View {
                 .padding()
             
             //X投稿部分
-            Button("Xに投稿") {
-                let text = TweetPhraseSelector.message(for: viewModel.stepCount)
-                // Attempt to load the image from the app bundle
-                if let image = UIImage(named: "main") {
-                    shareItems = [text, image]
-                } else {
-                    shareItems = [text]
-                }
-                showingShareSheet = true
+            Button("X で画像付き投稿") {
+                // 取得した歩数メッセージ
+                let msg = TweetPhraseSelector.message(for: viewModel.stepCount)
+                // main.jpg をバンドルからロード
+                let img = UIImage(named: "main")
+                isShowingCompose = true
             }
-            .padding()
-            .background(viewModel.stepCount > 0 ? Color.orange : Color.gray)
-            .foregroundColor(.white)
-            .cornerRadius(8)
-            .disabled(viewModel.stepCount == 0)
+            .sheet(isPresented: $isShowingCompose) {
+                TwitterComposer(text: TweetPhraseSelector.message(for: viewModel.stepCount),
+                                   image: UIImage(named: "main"))
+            }
         }
-        .padding()
-        .sheet(isPresented: $showingShareSheet) {
-            ShareSheet(activityItems: shareItems)
-        }
+        RingView(current: viewModel.stepCount, goal: 10000)
     }
 }
 
