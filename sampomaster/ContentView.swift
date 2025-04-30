@@ -39,8 +39,9 @@ struct ContentView: View {
             Text("📊 今日の歩数合計：\(viewModel.stepCount)歩")
                 .font(.headline)
                 .padding()
-
-            Button("Xで投稿（写真付き共有）") {
+            
+            //X投稿部分
+            Button("Xに投稿") {
                 let text = TweetPhraseSelector.message(for: viewModel.stepCount)
                 // Attempt to load the image from the app bundle
                 if let image = UIImage(named: "main") {
