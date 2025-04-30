@@ -17,24 +17,18 @@ struct ContentView: View {
     var body: some View {
         VStack(spacing: 20) {
             Text("サンポマスターアプリ")
-                .font(.title)
+                .font(.largeTitle.bold())
                 .padding()
 
             Button("HealthKitの許可をリクエスト") {
                 viewModel.requestAuthorization()
             }
-            .padding()
-            .background(Color.blue)
-            .foregroundColor(.white)
-            .cornerRadius(8)
-
+            .buttonStyle(PrimaryButtonStyle(color: .blue))
+            
             Button("今日の歩数を取得") {
                 viewModel.fetchTodayStepCount()
             }
-            .padding()
-            .background(Color.green)
-            .foregroundColor(.white)
-            .cornerRadius(8)
+            .buttonStyle(PrimaryButtonStyle(color: .green))
 
             Text("📊 今日の歩数合計：\(viewModel.stepCount)歩")
                 .font(.headline)
@@ -52,6 +46,7 @@ struct ContentView: View {
                 TwitterComposer(text: TweetPhraseSelector.message(for: viewModel.stepCount),
                                    image: UIImage(named: "main"))
             }
+            .buttonStyle(PrimaryButtonStyle(color: .orange))
         }
         RingView(current: viewModel.stepCount, goal: 10000)
     }
@@ -59,12 +54,4 @@ struct ContentView: View {
 
 #Preview {
     ContentView()
-}
-
-struct ShareSheet: UIViewControllerRepresentable {
-    let activityItems: [Any]
-    func makeUIViewController(context: Context) -> UIActivityViewController {
-        UIActivityViewController(activityItems: activityItems, applicationActivities: nil)
-    }
-    func updateUIViewController(_ uiViewController: UIActivityViewController, context: Context) {}
 }
