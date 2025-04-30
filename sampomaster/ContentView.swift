@@ -1,3 +1,4 @@
+// NOTE: Make sure to add "main.jpg" to your asset catalog (Assets.xcassets) as "main" or include it in Copy Bundle Resources.
 //
 //  ContentView.swift
 //  sampomaster
@@ -9,6 +10,8 @@ import SwiftUI
 import UIKit
 
 struct ContentView: View {
+    @State private var showingShareSheet = false
+    @State private var shareItems: [Any] = []
     @StateObject private var viewModel = StepCountViewModel()
 
     var body: some View {
@@ -37,9 +40,15 @@ struct ContentView: View {
                 .font(.headline)
                 .padding()
 
-            Button("Xで投稿") {
+            Button("Xで投稿（写真付き共有）") {
                 let text = TweetPhraseSelector.message(for: viewModel.stepCount)
-                TwitterComposer.openComposer(with: text)
+                // Attempt to load the image from the app bundle
+                if let image = UIImage(named: "main") {
+                    shareItems = [text, image]
+                } else {
+                    shareItems = [text]
+                }
+                showingShareSheet = true
             }
             .padding()
             .background(viewModel.stepCount > 0 ? Color.orange : Color.gray)
@@ -48,9 +57,20 @@ struct ContentView: View {
             .disabled(viewModel.stepCount == 0)
         }
         .padding()
+        .sheet(isPresented: $showingShareSheet) {
+            ShareSheet(activityItems: shareItems)
+        }
     }
 }
 
 #Preview {
     ContentView()
+}
+
+struct ShareSheet: UIViewControllerRepresentable {
+    let activityItems: [Any]
+    func makeUIViewController(context: Context) -> UIActivityViewController {
+        UIActivityViewController(activityItems: activityItems, applicationActivities: nil)
+    }
+    func updateUIViewController(_ uiViewController: UIActivityViewController, context: Context) {}
 }
