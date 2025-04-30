@@ -28,14 +28,16 @@ struct ContentView: View {
             .foregroundColor(.white)
             .cornerRadius(8)
 
-            Button("今日の歩数を取得") {
-                viewModel.fetchTodayStepCount()
+            Button {
+              viewModel.fetchTodayStepCount()
+            } label: {
+              Label("歩数を更新", systemImage: "figure.walk")
+                .padding()
+                .background(Color.white.opacity(0.8))
+                .cornerRadius(12)
+                .shadow(radius: 4)
             }
-            .padding()
-            .background(Color.green)
-            .foregroundColor(.white)
-            .cornerRadius(8)
-
+            
             Text("📊 今日の歩数合計：\(viewModel.stepCount)歩")
                 .font(.headline)
                 .padding()
@@ -60,8 +62,10 @@ struct ContentView: View {
         .sheet(isPresented: $showingShareSheet) {
             ShareSheet(activityItems: shareItems)
         }
+        RingView(current: viewModel.stepCount, goal: 10000)
     }
 }
+
 
 #Preview {
     ContentView()
