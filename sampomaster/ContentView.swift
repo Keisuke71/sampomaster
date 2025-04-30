@@ -49,7 +49,15 @@ struct ContentView: View {
             .buttonStyle(PrimaryButtonStyle(color: .orange))
         }
         RingView(current: viewModel.stepCount, goal: 10000)
+        
+        //アプリ起動時に歩数を自動取得
+            .padding()
+            .onAppear(){
+                //画面が現れたタイミングで自動取得
+                viewModel.fetchTodayStepCount()
+            }
     }
+        
 }
 
 #Preview {
