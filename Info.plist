@@ -6,5 +6,9 @@
 	<string>このアプリはあなたの歩数データを取得します。</string>
 	<key>NSHealthShareUsageDescription</key>
 	<string>このアプリはあなたの歩数データを取得します。</string>
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>twitter</string>
+	</array>
 </dict>
 </plist>
