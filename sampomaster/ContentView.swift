@@ -13,6 +13,7 @@ import Social
 struct ContentView: View {
     @StateObject private var viewModel = StepCountViewModel()
     @State private var isShowingCompose = false
+    @State private var isEditingGoal = false
 
     var body: some View {
         VStack(spacing: 20) {
@@ -48,7 +49,17 @@ struct ContentView: View {
             }
             .buttonStyle(PrimaryButtonStyle(color: .orange))
         }
-        RingView(current: viewModel.stepCount, goal: 10000)
+        //目標表示用シート
+        .sheet(isPresented: $isEditingGoal) {
+            GoalEditorView(isPresented: $isEditingGoal,
+                           goal: $viewModel.goal)
+        }
+        //目標のリングを表示
+        RingView(current: viewModel.stepCount, goal: viewModel.goal)
+            .padding()
+            .onTapGesture {
+            isEditingGoal = true
+             }
         
         //アプリ起動時に歩数を自動取得
             .padding()

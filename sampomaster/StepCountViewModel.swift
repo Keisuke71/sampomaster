@@ -9,6 +9,7 @@ import SwiftUI
 
 class StepCountViewModel: ObservableObject {
     @Published var stepCount: Int = 0
+    @Published var goal: Int = 10000
 
     /// HealthKitの許可をリクエスト
     func requestAuthorization() {
