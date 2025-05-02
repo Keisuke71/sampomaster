@@ -19,11 +19,6 @@ struct ContentView: View {
             Text("サンポマスターアプリ")
                 .font(.largeTitle.bold())
                 .padding()
-
-            Button("HealthKitの許可をリクエスト") {
-                viewModel.requestAuthorization()
-            }
-            .buttonStyle(PrimaryButtonStyle(color: .blue))
             
             Button("今日の歩数を取得") {
                 viewModel.fetchTodayStepCount()
@@ -62,6 +57,7 @@ struct ContentView: View {
         .padding()
         .onAppear {
             // 画面が現れたタイミングで自動取得
+            viewModel.requestAuthorization()
             viewModel.fetchTodayStepCount()
             viewModel.fetchTodayWalkingDistance()
         }
