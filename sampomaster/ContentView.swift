@@ -39,7 +39,7 @@ struct ContentView: View {
             
             //X投稿部分
             Button("X で画像付き投稿") {
-                let msg = TweetPhraseSelector.message(for: viewModel.stepCount)
+                let msg = TweetPhraseSelector.message(for: viewModel.stepCount, distance: viewModel.distance / 1000)
                 // main.jpg をバンドルからロード
                 _ = UIImage(named: "main")
                 isShowingCompose = true
@@ -62,7 +62,7 @@ struct ContentView: View {
             viewModel.fetchTodayWalkingDistance()
         }
         .sheet(isPresented: $isShowingCompose) {
-                        TwitterComposer(text: TweetPhraseSelector.message(for: viewModel.stepCount),
+            TwitterComposer(text: TweetPhraseSelector.message(for: viewModel.stepCount, distance: viewModel.distance / 1000),
                                            image: UIImage(named: "main"))
         }
         .sheet(isPresented: $isEditingGoal) {
