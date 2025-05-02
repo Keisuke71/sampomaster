@@ -8,7 +8,6 @@
 
 import SwiftUI
 import UIKit
-import Social
 
 struct ContentView: View {
     @StateObject private var viewModel = StepCountViewModel()
@@ -28,45 +27,52 @@ struct ContentView: View {
             
             Button("今日の歩数を取得") {
                 viewModel.fetchTodayStepCount()
+                viewModel.fetchTodayWalkingDistance()
             }
             .buttonStyle(PrimaryButtonStyle(color: .green))
 
             Text("📊 今日の歩数合計：\(viewModel.stepCount)歩")
                 .font(.headline)
                 .padding()
+            //歩行距離表示
+            Text(String(
+                format:"🚶‍♂️ 今日の歩行距離: %.2f km",
+                viewModel.distance / 1000
+            ))
+            .font(.subheadline)
+            .foregroundStyle(.gray)
             
             //X投稿部分
             Button("X で画像付き投稿") {
-                // 取得した歩数メッセージ
                 let msg = TweetPhraseSelector.message(for: viewModel.stepCount)
                 // main.jpg をバンドルからロード
-                let img = UIImage(named: "main")
+                _ = UIImage(named: "main")
                 isShowingCompose = true
             }
-            .sheet(isPresented: $isShowingCompose) {
-                TwitterComposer(text: TweetPhraseSelector.message(for: viewModel.stepCount),
-                                   image: UIImage(named: "main"))
-            }
             .buttonStyle(PrimaryButtonStyle(color: .orange))
+
+            // 目標のリングを表示
+            RingView(current: viewModel.stepCount, goal: viewModel.goal)
+            .padding()
+            .onTapGesture {
+                isEditingGoal = true
+            }
         }
-        //目標表示用シート
+        // VStack 終了
+        .padding()
+        .onAppear {
+            // 画面が現れたタイミングで自動取得
+            viewModel.fetchTodayStepCount()
+            viewModel.fetchTodayWalkingDistance()
+        }
+        .sheet(isPresented: $isShowingCompose) {
+                        TwitterComposer(text: TweetPhraseSelector.message(for: viewModel.stepCount),
+                                           image: UIImage(named: "main"))
+        }
         .sheet(isPresented: $isEditingGoal) {
             GoalEditorView(isPresented: $isEditingGoal,
                            goal: $viewModel.goal)
         }
-        //目標のリングを表示
-        RingView(current: viewModel.stepCount, goal: viewModel.goal)
-            .padding()
-            .onTapGesture {
-            isEditingGoal = true
-             }
-        
-        //アプリ起動時に歩数を自動取得
-            .padding()
-            .onAppear(){
-                //画面が現れたタイミングで自動取得
-                viewModel.fetchTodayStepCount()
-            }
     }
         
 }
