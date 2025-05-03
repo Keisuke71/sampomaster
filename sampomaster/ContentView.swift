@@ -19,11 +19,6 @@ struct ContentView: View {
             Text("サンポマスターアプリ")
                 .font(.largeTitle.bold())
                 .padding()
-
-            Button("HealthKitの許可をリクエスト") {
-                viewModel.requestAuthorization()
-            }
-            .buttonStyle(PrimaryButtonStyle(color: .blue))
             
             Button("今日の歩数を取得") {
                 viewModel.fetchTodayStepCount()
@@ -44,7 +39,7 @@ struct ContentView: View {
             
             //X投稿部分
             Button("X で画像付き投稿") {
-                let msg = TweetPhraseSelector.message(for: viewModel.stepCount)
+                let msg = TweetPhraseSelector.message(for: viewModel.stepCount, distance: viewModel.distance / 1000)
                 // main.jpg をバンドルからロード
                 _ = UIImage(named: "main")
                 isShowingCompose = true
@@ -62,11 +57,12 @@ struct ContentView: View {
         .padding()
         .onAppear {
             // 画面が現れたタイミングで自動取得
+            viewModel.requestAuthorization()
             viewModel.fetchTodayStepCount()
             viewModel.fetchTodayWalkingDistance()
         }
         .sheet(isPresented: $isShowingCompose) {
-                        TwitterComposer(text: TweetPhraseSelector.message(for: viewModel.stepCount),
+            TwitterComposer(text: TweetPhraseSelector.message(for: viewModel.stepCount, distance: viewModel.distance / 1000),
                                            image: UIImage(named: "main"))
         }
         .sheet(isPresented: $isEditingGoal) {
