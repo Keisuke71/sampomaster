@@ -10,6 +10,8 @@ import HealthKit
 class HealthKitManager {
     static let shared = HealthKitManager()
     private let healthStore = HKHealthStore()
+    private var stepObserverQuery: HKObserverQuery?
+    private var distanceObserverQuery: HKObserverQuery?
 
     /// HealthKitの使用許可をリクエスト
     func requestAuthorization(completion: @escaping (Bool, Error?) -> Void) {
@@ -79,5 +81,50 @@ class HealthKitManager {
                 }
             }
             healthStore.execute(query)
+    }
+}
+
+extension HealthKitManager {
+    /// バックグラウンドでの歩数・距離更新を有効化
+    func enableStepBackgroundDelivery() {
+        guard let stepType = HKObjectType.quantityType(forIdentifier: .stepCount),
+              let distanceType = HKObjectType.quantityType(forIdentifier: .distanceWalkingRunning)
+        else {
+            return
+        }
+
+        // Background Delivery の設定
+        healthStore.enableBackgroundDelivery(
+            for: stepType,
+            frequency: .immediate
+        ) { success, error in
+            print("🔔 歩数バックグラウンド配信:", success, error ?? "")
+        }
+        healthStore.enableBackgroundDelivery(
+            for: distanceType,
+            frequency: .immediate
+        ) { success, error in
+            print("🔔 距離バックグラウンド配信:", success, error ?? "")
+        }
+
+        // 歩数更新の ObserverQuery
+        stepObserverQuery = HKObserverQuery(
+            sampleType: stepType,
+            predicate: nil
+        ) { [weak self] _, completionHandler, error in
+            self?.fetchTodayStepCount { _, _ in }
+            completionHandler()
+        }
+        healthStore.execute(stepObserverQuery!)
+
+        // 距離更新の ObserverQuery
+        distanceObserverQuery = HKObserverQuery(
+            sampleType: distanceType,
+            predicate: nil
+        ) { [weak self] _, completionHandler, error in
+            self?.fetchTodayWalkingDistance { _, _ in }
+            completionHandler()
+        }
+        healthStore.execute(distanceObserverQuery!)
     }
 }
