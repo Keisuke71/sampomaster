@@ -11,10 +11,14 @@ import SwiftUI
 struct sampomasterApp: App {
     init() {
         //通知許可をリクエスト
-        NotificationManager.shared.requestAuthrozation()
+        HealthKitManager.shared.requestAuthorization { _, _ in
+            //許可後にバックグラウンド更新を有効化
+            HealthKitManager.shared.enableStepBackgroundDelivery()
+        }
         //毎日何時にリマインダーを登録するか設定
         NotificationManager.shared.scheduleDailyReminder(hour: 18)
     }
+    
     var body: some Scene {
         WindowGroup {
             ContentView()
