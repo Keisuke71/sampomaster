@@ -19,9 +19,9 @@
         <string>fetch</string>
         <string>remote-notification</string>
     </array>
-    <Key>BGTaskSchedulerPermittedIdentifiers</Key>
+    <key>BGTaskSchedulerPermittedIdentifiers</key>
     <array>
-        <string>com.Keisuke71.sampomaster.refresh</string>
+        <string>com.keisuke71.sampomaster.refresh</string>
     </array>
 </dict>
 </plist>

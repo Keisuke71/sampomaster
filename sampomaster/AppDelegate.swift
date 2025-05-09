@@ -15,7 +15,7 @@ class AppDelegate: NSObject, UIApplicationDelegate {
   ) -> Bool {
     // 1) タスク登録
     BGTaskScheduler.shared.register(
-      forTaskWithIdentifier: "com.Keisuke71.sampomaster.refresh",
+      forTaskWithIdentifier: "com.keisuke71.sampomaster.refresh",
       using: nil
     ) { task in
       self.handleAppRefresh(task: task as! BGAppRefreshTask)
@@ -23,23 +23,27 @@ class AppDelegate: NSObject, UIApplicationDelegate {
 
     // 2) 初回スケジュール
     scheduleAppRefresh()
+    print("🛠️ didFinishLaunchingWithOptions - scheduled first background refresh")
     return true
   }
 
   /// 定期バックグラウンド更新をスケジュール
   func scheduleAppRefresh() {
-    let request = BGAppRefreshTaskRequest(identifier: "com.yourcompany.sampomaster.refresh")
+    let request = BGAppRefreshTaskRequest(identifier: "com.keisuke71.sampomaster.refresh")
+    print("🛠️ scheduleAppRefresh - scheduling refresh at earliestBeginDate: \(request.earliestBeginDate?.description ?? "nil")")
     // earliestBeginDate を nil にするとシステムに最適化任せ
     request.earliestBeginDate = Date(timeIntervalSinceNow: 60 * 60) // 1h後以降
     do {
       try BGTaskScheduler.shared.submit(request)
+      print("🛠️ BGTaskScheduler.submit succeeded for \(request.identifier)")
     } catch {
-      print("⚠️ BGTaskScheduler submit failed: \(error)")
+      print("⚠️ BGTaskScheduler.submit failed for \(request.identifier): \(error)")
     }
   }
 
   /// 実際にフェッチ＆次回スケジュールを行うハンドラ
   func handleAppRefresh(task: BGAppRefreshTask) {
+    print("🛠️ handleAppRefresh started for task: \(task.identifier)")
     // 1) 次回分を必ずスケジュール
     scheduleAppRefresh()
 
@@ -54,9 +58,11 @@ class AppDelegate: NSObject, UIApplicationDelegate {
       group.wait()
     }
     task.expirationHandler = {
+      print("⚠️ handleAppRefresh expired, cancelling operations")
       queue.cancelAllOperations()
     }
     op.completionBlock = {
+      print("🛠️ handleAppRefresh - fetch operations completed; cancelled: \(op.isCancelled)")
       task.setTaskCompleted(success: !op.isCancelled)
     }
     queue.addOperation(op)
