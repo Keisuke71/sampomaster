@@ -10,6 +10,8 @@ import SwiftUI
 @main
 struct sampomasterApp: App {
     init() {
+        @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
+        
         //通知許可をリクエスト
         HealthKitManager.shared.requestAuthorization { _, _ in
             //許可後にバックグラウンド更新を有効化
