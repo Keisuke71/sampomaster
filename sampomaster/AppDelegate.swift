@@ -32,7 +32,7 @@ class AppDelegate: NSObject, UIApplicationDelegate {
     let request = BGAppRefreshTaskRequest(identifier: "com.keisuke71.sampomaster.refresh")
     print("🛠️ scheduleAppRefresh - scheduling refresh at earliestBeginDate: \(request.earliestBeginDate?.description ?? "nil")")
     // earliestBeginDate を nil にするとシステムに最適化任せ
-    request.earliestBeginDate = Date(timeIntervalSinceNow: 60 * 60) // 1h後以降
+    request.earliestBeginDate = Date(timeIntervalSinceNow: 60) //
     do {
       try BGTaskScheduler.shared.submit(request)
       print("🛠️ BGTaskScheduler.submit succeeded for \(request.identifier)")
