@@ -17,12 +17,13 @@ class HealthKitManager {
     func requestAuthorization(completion: @escaping (Bool, Error?) -> Void) {
         guard HKHealthStore.isHealthDataAvailable(),
               let stepType = HKQuantityType.quantityType(forIdentifier: .stepCount),
-              let distanceType = HKQuantityType.quantityType(forIdentifier: .distanceWalkingRunning)
+              let distanceType = HKQuantityType.quantityType(forIdentifier: .distanceWalkingRunning),
+              let weightType = HKQuantityType.quantityType(forIdentifier: .bodyMass)
         else {
             completion(false, nil)
             return
         }
-        healthStore.requestAuthorization(toShare: [], read: [stepType, distanceType], completion: completion)
+        healthStore.requestAuthorization(toShare: [], read: [stepType, distanceType, weightType], completion: completion)
     }
 
     /// 今日の歩数合計を取得
@@ -81,6 +82,32 @@ class HealthKitManager {
                 }
             }
             healthStore.execute(query)
+    }
+    
+    func fetchLatestWeight(completion: @escaping (Double?, Error?) -> Void) {
+        guard HKHealthStore.isHealthDataAvailable(),
+              let weightType = HKQuantityType.quantityType(forIdentifier: .bodyMass)
+        else {
+            completion(nil, nil)
+            return
+        }
+        
+        //日付の範囲は広くとって、最新１件を取得
+        let sortDescriptor = NSSortDescriptor(key: HKSampleSortIdentifierStartDate, ascending: false)
+        let query = HKSampleQuery(
+            sampleType: weightType,
+            predicate: nil,
+            limit: 1,
+            sortDescriptors: [sortDescriptor]
+        ) { _, samples, error in
+            if let sample = samples?.first as? HKQuantitySample{
+                let kg = sample.quantity.doubleValue(for: HKUnit.gramUnit(with: .kilo))
+                completion(kg, nil)
+            } else {
+                completion(nil, error)
+            }
+        }
+        healthStore.execute(query)
     }
 }
 
