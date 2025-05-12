@@ -43,8 +43,7 @@ struct ContentView: View {
                 }
                 if viewModel.calories > 0 {
                     Text(String(
-                        format: "🔥 推定消費カロリー：%.0f kcal",
-                        viewModel.calories
+                        format: "🔥 推定消費カロリー：\(viewModel.calories) kcal"
                     ))
                     .font(.subheadline)
                     .foregroundColor(.secondary)

@@ -56,8 +56,13 @@ class StepCountViewModel: ObservableObject {
     
     // 体重・距離・歩数取得後に消費カロリーを計算
     private func updateCalories() {
-        guard let w = weight else { return }
-        let burned = CalorieCalc.caloriesBurned(distanceMeters: distance, weightKg: w)
+        guard let w = weight else {
+            self.calories = 0
+            return
+        }
+        // 1kg あたり 1km で約 1kcal 消費と仮定
+        let burned = w * (distance / 1000.0)
+        
         DispatchQueue.main.async {
             self.calories = Int(burned)
         }
