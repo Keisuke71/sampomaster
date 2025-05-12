@@ -35,6 +35,20 @@ struct ContentView: View {
                 .font(.subheadline)
                 .foregroundStyle(.gray)
                 
+                if let w = viewModel.weight {
+                    Text(String(
+                        format:"⚖️ 最新の体重: %.1f kg", w))
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                }
+                if viewModel.calories > 0 {
+                    Text(String(
+                        format: "🔥 推定消費カロリー：\(viewModel.calories) kcal"
+                    ))
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+                }
+
                 //X投稿部分
                 Button("X で画像付き投稿") {
                     let msg = TweetPhraseSelector.message(for: viewModel.stepCount, distance: viewModel.distance / 1000)
@@ -59,11 +73,13 @@ struct ContentView: View {
             viewModel.requestAuthorization()
             viewModel.fetchTodayStepCount()
             viewModel.fetchTodayWalkingDistance()
+            viewModel.fetchLatestWeight()
         }
         .refreshable {
             // プル後の更新処理
             viewModel.fetchTodayStepCount()
             viewModel.fetchTodayWalkingDistance()
+            viewModel.fetchLatestWeight()
         }
         .sheet(isPresented: $isShowingCompose) {
             TwitterComposer(text: TweetPhraseSelector.message(for: viewModel.stepCount, distance: viewModel.distance / 1000),
