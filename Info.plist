@@ -2,26 +2,22 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key></key>
-	<string></string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>歩行距離の自動記録のため、常に位置情報の利用を許可してください。</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>アプリ起動中に位置情報を利用します。</string>
 	<key>LSApplicationQueriesSchemes</key>
 	<array>
 		<string>twitter</string>
 	</array>
 	<key>UIBackgroundModes</key>
 	<array>
-		<string>remote-notification</string>
 		<string>fetch</string>
-		<string>processing</string>
+		<string>remote-notification</string>
 	</array>
-    <key>UIBackgroundModes</key>
-    <array>
-        <string>fetch</string>
-        <string>remote-notification</string>
-    </array>
-    <key>BGTaskSchedulerPermittedIdentifiers</key>
-    <array>
-        <string>com.keisuke71.sampomaster.refresh</string>
-    </array>
+	<key>BGTaskSchedulerPermittedIdentifiers</key>
+	<array>
+		<string>com.keisuke71.sampomaster.refresh</string>
+	</array>
 </dict>
 </plist>
