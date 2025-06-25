@@ -10,6 +10,7 @@ import SwiftUI
 import UIKit
 
 struct ContentView: View {
+    @Environment(\.scenePhase) private var scenePhase
     @StateObject private var viewModel = StepCountViewModel()
     @State private var isShowingCompose = false
     @State private var isEditingGoal = false
@@ -74,6 +75,13 @@ struct ContentView: View {
             viewModel.fetchTodayStepCount()
             viewModel.fetchTodayWalkingDistance()
             viewModel.fetchLatestWeight()
+        }
+        .onChange(of: scenePhase) { oldPhase, newPhase in
+            if newPhase == .active {
+                viewModel.fetchTodayStepCount()
+                viewModel.fetchTodayWalkingDistance()
+                viewModel.fetchLatestWeight()
+            }
         }
         .refreshable {
             // プル後の更新処理
