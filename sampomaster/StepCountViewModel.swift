@@ -13,6 +13,7 @@ class StepCountViewModel: ObservableObject {
     @Published var goal: Int = 10000
     @Published var weight: Double?
     @Published var calories: Int = 0
+    static let shared = StepCountViewModel()
     
     /// HealthKitの許可をリクエスト
     func requestAuthorization() {
@@ -62,7 +63,6 @@ class StepCountViewModel: ObservableObject {
         }
         // 1kg あたり 1km で約 1kcal 消費と仮定
         let burned = w * (distance / 1000.0)
-        
         DispatchQueue.main.async {
             self.calories = Int(burned)
         }

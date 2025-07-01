@@ -10,6 +10,7 @@ import SwiftUI
 import UIKit
 
 struct ContentView: View {
+    @Environment(\.scenePhase) private var scenePhase
     @StateObject private var viewModel = StepCountViewModel()
     @State private var isShowingCompose = false
     @State private var isEditingGoal = false
@@ -41,6 +42,7 @@ struct ContentView: View {
                         .font(.subheadline)
                         .foregroundColor(.secondary)
                 }
+                
                 if viewModel.calories > 0 {
                     Text(String(
                         format: "🔥 推定消費カロリー：\(viewModel.calories) kcal"
@@ -74,6 +76,14 @@ struct ContentView: View {
             viewModel.fetchTodayStepCount()
             viewModel.fetchTodayWalkingDistance()
             viewModel.fetchLatestWeight()
+        }
+        //画面遷移時（ホーム画面等から戻ってきた時）に更新
+        .onChange(of: scenePhase) { oldPhase, newPhase in
+            if newPhase == .active {
+                viewModel.fetchTodayStepCount()
+                viewModel.fetchTodayWalkingDistance()
+                viewModel.fetchLatestWeight()
+            }
         }
         .refreshable {
             // プル後の更新処理
