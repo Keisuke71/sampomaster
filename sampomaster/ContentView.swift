@@ -42,6 +42,7 @@ struct ContentView: View {
                         .font(.subheadline)
                         .foregroundColor(.secondary)
                 }
+                
                 if viewModel.calories > 0 {
                     Text(String(
                         format: "🔥 推定消費カロリー：\(viewModel.calories) kcal"
@@ -76,6 +77,7 @@ struct ContentView: View {
             viewModel.fetchTodayWalkingDistance()
             viewModel.fetchLatestWeight()
         }
+        //画面遷移時（ホーム画面等から戻ってきた時）に更新
         .onChange(of: scenePhase) { oldPhase, newPhase in
             if newPhase == .active {
                 viewModel.fetchTodayStepCount()

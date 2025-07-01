@@ -21,9 +21,25 @@ struct sampomasterApp: App {
         NotificationManager.shared.scheduleDailyReminder(hour: 18)
     }
     
+    // MARK: 画面下部のタブ
+    /// タブを追加する際はNavigationViewで
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            TabView {
+                // ホームタブ
+                NavigationView{
+                    ContentView()
+                }
+                .tabItem {
+                    Label("ホーム", systemImage: "house")
+                }
+                NavigationView {
+                    StepHistoryView()
+                }
+                .tabItem {
+                    Label("履歴", systemImage: "clock")
+                }
+            }
         }
     }
 }
