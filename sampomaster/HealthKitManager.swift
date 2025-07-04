@@ -112,6 +112,27 @@ class HealthKitManager {
 }
 
 extension HealthKitManager {
+    func fetchStepCount(from start: Date,
+                          to end: Date = Date(),
+                          completion: @escaping (Int, Error?) -> Void) {
+        guard let type = HKQuantityType.quantityType(forIdentifier: .stepCount) else {
+          completion(0, nil); return
+        }
+        let predicate = HKQuery.predicateForSamples(
+          withStart: start,
+          end: end,
+          options: .strictStartDate
+        )
+        let query = HKStatisticsQuery(
+          quantityType: type,
+          quantitySamplePredicate: predicate,
+          options: .cumulativeSum
+        ) { _, result, error in
+          let count = result?.sumQuantity()?.doubleValue(for: .count()) ?? 0
+          completion(Int(count), error)
+        }
+        healthStore.execute(query)
+      }
     /// バックグラウンドでの歩数・距離更新を有効化
     func enableStepBackgroundDelivery() {
         guard let stepType = HKObjectType.quantityType(forIdentifier: .stepCount),
@@ -152,6 +173,8 @@ extension HealthKitManager {
             self?.fetchTodayWalkingDistance { _, _ in }
             completionHandler()
         }
+        
         healthStore.execute(distanceObserverQuery!)
+        
     }
 }
