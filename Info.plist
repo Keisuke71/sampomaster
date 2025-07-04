@@ -2,10 +2,10 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>現在地の天気情報を取得するために位置情報を利用します。</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
 	<string>歩行距離の自動記録のため、常に位置情報の利用を許可してください。</string>
-	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>アプリ起動中に位置情報を利用します。</string>
 	<key>LSApplicationQueriesSchemes</key>
 	<array>
 		<string>twitter</string>

@@ -9,8 +9,13 @@ import SwiftUI
 
 @main
 struct sampomasterApp: App {
+    
+    @State private var showSplash = true
+    
     init() {
         @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
+        
+        
         
         //通知許可をリクエスト
         HealthKitManager.shared.requestAuthorization { _, _ in
@@ -30,7 +35,21 @@ struct sampomasterApp: App {
     /// タブのコードはMainTabViewに格納
     var body: some Scene {
         WindowGroup {
-            MainTabView()
+            Group {
+                if showSplash {
+                    SplashView()
+                } else {
+                    MainTabView()
+                }
+            }
+            .onAppear {
+                // 2秒後にスプラッシュを閉じる
+                DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                    withAnimation(.easeOut(duration: 0.5)) {
+                        showSplash = false
+                    }
+                }
+            }
         }
     }
 }
