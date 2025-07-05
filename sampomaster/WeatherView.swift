@@ -23,9 +23,19 @@ struct OWMWeatherResponse: Codable {
 
 // MARK: - サービス
 actor WeatherAPIService {
-    private let apiKey = ProcessInfo.processInfo.environment["OPENWEATHER_API_KEY"]
+    private let apiKey: String
+    
+    init() {
+        guard let key = Bundle.main.object(forInfoDictionaryKey: "OPENWEATHER_API_KEY") as? String,
+              !key.isEmpty
+        else {
+            fatalError("⚠️ API Key missing in Info.plist")
+        }
+        apiKey = key
+    }
     
     func fetchWeather(lat: Double, lon: Double) async throws -> OWMWeatherResponse {
+        // ここでは安全に apiKey が使える
         var comps = URLComponents(string: "https://api.openweathermap.org/data/2.5/weather")!
         comps.queryItems = [
             .init(name: "lat", value: "\(lat)"),
@@ -34,8 +44,7 @@ actor WeatherAPIService {
             .init(name: "units", value: "metric"),
         ]
         let (data, _) = try await URLSession.shared.data(from: comps.url!)
-        let resp = try JSONDecoder().decode(OWMWeatherResponse.self, from: data)
-        return resp
+        return try JSONDecoder().decode(OWMWeatherResponse.self, from: data)
     }
 }
 

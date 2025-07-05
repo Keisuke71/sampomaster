@@ -2,6 +2,8 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>OPENWEATHER_API_KEY</key>
+	<string>$(OPENWEATHER_API_KEY)</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>現在地の天気情報を取得するために位置情報を利用します。</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
