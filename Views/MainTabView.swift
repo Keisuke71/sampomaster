@@ -14,24 +14,8 @@ struct MainTabView: View {
     
     var body: some View {
         VStack(spacing: 0) {
-            //ランク表示部分
-            VStack(spacing: 8){
-                Text("ランク: \(rankManager.currentRank)")
-                    .font(.title2.bold())
-                
-                // 進捗バー
-                ProgressView(value: rankManager.progress) {
-                    Text("次のランクまで")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                } currentValueLabel: {
-                    Text("\(rankManager.stepsRemainingForNextRank) 歩")
-                        .font(.caption)
-                }
-            }
-            .padding()
-            .background(Color(UIColor.systemBackground).shadow(radius: 2))
-
+            //ヘッダを表示
+            HeaderTabView()
             
             //タブビュー部分
             TabView {

@@ -9,9 +9,6 @@ import SwiftUI
 import CoreLocation
 import Foundation
 
-import Foundation
-import CoreLocation
-
 // MARK: - モデル
 struct OWMWeatherResponse: Codable {
     struct Main: Codable {

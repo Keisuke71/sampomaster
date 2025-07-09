@@ -6,6 +6,33 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		7DC024BC2E1DF3CA00E03B44 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 7DC024A32E1DF3CA00E03B44 /* Assets.xcassets */; };
+		7DC024BE2E1DF3CA00E03B44 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DC024B12E1DF3CA00E03B44 /* SettingsView.swift */; };
+		7DC024C02E1DF3CA00E03B44 /* PrimaryButtonStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DC024AC2E1DF3CA00E03B44 /* PrimaryButtonStyle.swift */; };
+		7DC024C12E1DF3CA00E03B44 /* SplashView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DC024B32E1DF3CA00E03B44 /* SplashView.swift */; };
+		7DC024C32E1DF3CA00E03B44 /* StatsTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DC024B42E1DF3CA00E03B44 /* StatsTabView.swift */; };
+		7DC024C42E1DF3CA00E03B44 /* StepCountViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DC024B52E1DF3CA00E03B44 /* StepCountViewModel.swift */; };
+		7DC024C52E1DF3CA00E03B44 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DC024A42E1DF3CA00E03B44 /* ContentView.swift */; };
+		7DC024C62E1DF3CA00E03B44 /* StepHistoryChatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DC024B62E1DF3CA00E03B44 /* StepHistoryChatView.swift */; };
+		7DC024C72E1DF3CA00E03B44 /* GoalEditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DC024A52E1DF3CA00E03B44 /* GoalEditorView.swift */; };
+		7DC024C82E1DF3CA00E03B44 /* RingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DC024AE2E1DF3CA00E03B44 /* RingView.swift */; };
+		7DC024C92E1DF3CA00E03B44 /* GoalProgressView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DC024A62E1DF3CA00E03B44 /* GoalProgressView.swift */; };
+		7DC024CA2E1DF3CA00E03B44 /* StepHistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DC024B72E1DF3CA00E03B44 /* StepHistoryView.swift */; };
+		7DC024CB2E1DF3CA00E03B44 /* TotalDataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DC024B82E1DF3CA00E03B44 /* TotalDataManager.swift */; };
+		7DC024CC2E1DF3CA00E03B44 /* HealthKitManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DC024A72E1DF3CA00E03B44 /* HealthKitManager.swift */; };
+		7DC024CD2E1DF3CA00E03B44 /* TweetPhraseSelector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DC024B92E1DF3CA00E03B44 /* TweetPhraseSelector.swift */; };
+		7DC024CE2E1DF3CA00E03B44 /* TwitterComposer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DC024BA2E1DF3CA00E03B44 /* TwitterComposer.swift */; };
+		7DC024CF2E1DF3CA00E03B44 /* MainTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DC024AA2E1DF3CA00E03B44 /* MainTabView.swift */; };
+		7DC024D02E1DF3CA00E03B44 /* SplashBackgroundView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DC024B22E1DF3CA00E03B44 /* SplashBackgroundView.swift */; };
+		7DC024D12E1DF3CA00E03B44 /* WeatherView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DC024BB2E1DF3CA00E03B44 /* WeatherView.swift */; };
+		7DC024D22E1DF3CA00E03B44 /* NotificationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DC024AB2E1DF3CA00E03B44 /* NotificationManager.swift */; };
+		7DC024D32E1DF3CA00E03B44 /* RankManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DC024AD2E1DF3CA00E03B44 /* RankManager.swift */; };
+		7DC024D42E1DF3CA00E03B44 /* LocationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DC024A92E1DF3CA00E03B44 /* LocationManager.swift */; };
+		7DC024DD2E1E16EE00E03B44 /* CurrencyViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DC024DB2E1E16E300E03B44 /* CurrencyViewModel.swift */; };
+		7DC024E02E1E173600E03B44 /* HeaderTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DC024DE2E1E173100E03B44 /* HeaderTabView.swift */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		7D08A96D2DBC786D004E6C49 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -31,6 +58,30 @@
 		7D08A98C2DBC78FC004E6C49 /* .gitignore */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitignore; sourceTree = "<group>"; };
 		7D08A98E2DBC7993004E6C49 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		7D08A9912DBC96C7004E6C49 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		7DC024A32E1DF3CA00E03B44 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		7DC024A42E1DF3CA00E03B44 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		7DC024A52E1DF3CA00E03B44 /* GoalEditorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoalEditorView.swift; sourceTree = "<group>"; };
+		7DC024A62E1DF3CA00E03B44 /* GoalProgressView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoalProgressView.swift; sourceTree = "<group>"; };
+		7DC024A72E1DF3CA00E03B44 /* HealthKitManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthKitManager.swift; sourceTree = "<group>"; };
+		7DC024A92E1DF3CA00E03B44 /* LocationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationManager.swift; sourceTree = "<group>"; };
+		7DC024AA2E1DF3CA00E03B44 /* MainTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainTabView.swift; sourceTree = "<group>"; };
+		7DC024AB2E1DF3CA00E03B44 /* NotificationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationManager.swift; sourceTree = "<group>"; };
+		7DC024AC2E1DF3CA00E03B44 /* PrimaryButtonStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrimaryButtonStyle.swift; sourceTree = "<group>"; };
+		7DC024AD2E1DF3CA00E03B44 /* RankManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RankManager.swift; sourceTree = "<group>"; };
+		7DC024AE2E1DF3CA00E03B44 /* RingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RingView.swift; sourceTree = "<group>"; };
+		7DC024B12E1DF3CA00E03B44 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		7DC024B22E1DF3CA00E03B44 /* SplashBackgroundView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SplashBackgroundView.swift; sourceTree = "<group>"; };
+		7DC024B32E1DF3CA00E03B44 /* SplashView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SplashView.swift; sourceTree = "<group>"; };
+		7DC024B42E1DF3CA00E03B44 /* StatsTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatsTabView.swift; sourceTree = "<group>"; };
+		7DC024B52E1DF3CA00E03B44 /* StepCountViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StepCountViewModel.swift; sourceTree = "<group>"; };
+		7DC024B62E1DF3CA00E03B44 /* StepHistoryChatView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StepHistoryChatView.swift; sourceTree = "<group>"; };
+		7DC024B72E1DF3CA00E03B44 /* StepHistoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StepHistoryView.swift; sourceTree = "<group>"; };
+		7DC024B82E1DF3CA00E03B44 /* TotalDataManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TotalDataManager.swift; sourceTree = "<group>"; };
+		7DC024B92E1DF3CA00E03B44 /* TweetPhraseSelector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TweetPhraseSelector.swift; sourceTree = "<group>"; };
+		7DC024BA2E1DF3CA00E03B44 /* TwitterComposer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TwitterComposer.swift; sourceTree = "<group>"; };
+		7DC024BB2E1DF3CA00E03B44 /* WeatherView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherView.swift; sourceTree = "<group>"; };
+		7DC024DB2E1E16E300E03B44 /* CurrencyViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CurrencyViewModel.swift; sourceTree = "<group>"; };
+		7DC024DE2E1E173100E03B44 /* HeaderTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeaderTabView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -79,6 +130,12 @@
 		7D08A9562DBC786A004E6C49 = {
 			isa = PBXGroup;
 			children = (
+				7DC024F82E1E1B6100E03B44 /* Managers */,
+				7DC024F72E1E1AB000E03B44 /* Services */,
+				7DC024F42E1E1A2B00E03B44 /* Resources */,
+				7DC024F22E1E1A1D00E03B44 /* Views */,
+				7DC024F12E1E1A1200E03B44 /* ViewModels */,
+				7DC024F02E1E1A0C00E03B44 /* Models */,
 				7D06D08D2E18B0E7005C8DB0 /* Secrets.xcconfig */,
 				7D08A9912DBC96C7004E6C49 /* Info.plist */,
 				7D08A98E2DBC7993004E6C49 /* README.md */,
@@ -98,6 +155,72 @@
 				7D08A9762DBC786D004E6C49 /* sampomasterUITests.xctest */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		7DC024F02E1E1A0C00E03B44 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		7DC024F12E1E1A1200E03B44 /* ViewModels */ = {
+			isa = PBXGroup;
+			children = (
+				7DC024B52E1DF3CA00E03B44 /* StepCountViewModel.swift */,
+				7DC024AC2E1DF3CA00E03B44 /* PrimaryButtonStyle.swift */,
+				7DC024DB2E1E16E300E03B44 /* CurrencyViewModel.swift */,
+			);
+			path = ViewModels;
+			sourceTree = "<group>";
+		};
+		7DC024F22E1E1A1D00E03B44 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				7DC024B72E1DF3CA00E03B44 /* StepHistoryView.swift */,
+				7DC024B62E1DF3CA00E03B44 /* StepHistoryChatView.swift */,
+				7DC024B42E1DF3CA00E03B44 /* StatsTabView.swift */,
+				7DC024AE2E1DF3CA00E03B44 /* RingView.swift */,
+				7DC024A42E1DF3CA00E03B44 /* ContentView.swift */,
+				7DC024A52E1DF3CA00E03B44 /* GoalEditorView.swift */,
+				7DC024A62E1DF3CA00E03B44 /* GoalProgressView.swift */,
+				7DC024DE2E1E173100E03B44 /* HeaderTabView.swift */,
+				7DC024AA2E1DF3CA00E03B44 /* MainTabView.swift */,
+				7DC024B12E1DF3CA00E03B44 /* SettingsView.swift */,
+				7DC024B22E1DF3CA00E03B44 /* SplashBackgroundView.swift */,
+				7DC024B32E1DF3CA00E03B44 /* SplashView.swift */,
+				7DC024BB2E1DF3CA00E03B44 /* WeatherView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		7DC024F42E1E1A2B00E03B44 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		7DC024F72E1E1AB000E03B44 /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				7DC024A32E1DF3CA00E03B44 /* Assets.xcassets */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
+		7DC024F82E1E1B6100E03B44 /* Managers */ = {
+			isa = PBXGroup;
+			children = (
+				7DC024BA2E1DF3CA00E03B44 /* TwitterComposer.swift */,
+				7DC024B92E1DF3CA00E03B44 /* TweetPhraseSelector.swift */,
+				7DC024AD2E1DF3CA00E03B44 /* RankManager.swift */,
+				7DC024A92E1DF3CA00E03B44 /* LocationManager.swift */,
+				7DC024A72E1DF3CA00E03B44 /* HealthKitManager.swift */,
+				7DC024AB2E1DF3CA00E03B44 /* NotificationManager.swift */,
+				7DC024B82E1DF3CA00E03B44 /* TotalDataManager.swift */,
+			);
+			path = Managers;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -220,6 +343,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				7DC024BC2E1DF3CA00E03B44 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -244,6 +368,29 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				7DC024BE2E1DF3CA00E03B44 /* SettingsView.swift in Sources */,
+				7DC024DD2E1E16EE00E03B44 /* CurrencyViewModel.swift in Sources */,
+				7DC024C02E1DF3CA00E03B44 /* PrimaryButtonStyle.swift in Sources */,
+				7DC024C12E1DF3CA00E03B44 /* SplashView.swift in Sources */,
+				7DC024C32E1DF3CA00E03B44 /* StatsTabView.swift in Sources */,
+				7DC024C42E1DF3CA00E03B44 /* StepCountViewModel.swift in Sources */,
+				7DC024C52E1DF3CA00E03B44 /* ContentView.swift in Sources */,
+				7DC024C62E1DF3CA00E03B44 /* StepHistoryChatView.swift in Sources */,
+				7DC024C72E1DF3CA00E03B44 /* GoalEditorView.swift in Sources */,
+				7DC024C82E1DF3CA00E03B44 /* RingView.swift in Sources */,
+				7DC024C92E1DF3CA00E03B44 /* GoalProgressView.swift in Sources */,
+				7DC024CA2E1DF3CA00E03B44 /* StepHistoryView.swift in Sources */,
+				7DC024CB2E1DF3CA00E03B44 /* TotalDataManager.swift in Sources */,
+				7DC024CC2E1DF3CA00E03B44 /* HealthKitManager.swift in Sources */,
+				7DC024CD2E1DF3CA00E03B44 /* TweetPhraseSelector.swift in Sources */,
+				7DC024E02E1E173600E03B44 /* HeaderTabView.swift in Sources */,
+				7DC024CE2E1DF3CA00E03B44 /* TwitterComposer.swift in Sources */,
+				7DC024CF2E1DF3CA00E03B44 /* MainTabView.swift in Sources */,
+				7DC024D02E1DF3CA00E03B44 /* SplashBackgroundView.swift in Sources */,
+				7DC024D12E1DF3CA00E03B44 /* WeatherView.swift in Sources */,
+				7DC024D22E1DF3CA00E03B44 /* NotificationManager.swift in Sources */,
+				7DC024D32E1DF3CA00E03B44 /* RankManager.swift in Sources */,
+				7DC024D42E1DF3CA00E03B44 /* LocationManager.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
