@@ -25,8 +25,6 @@ struct sampomasterApp: App {
         //毎日何時にリマインダーを登録するか設定
         NotificationManager.shared.scheduleDailyReminder(hour: 18)
         
-        RankManager.shared.startTracking()
-        
         /// 最新の今日の歩数を取得
         StepCountViewModel.shared.fetchTodayStepCount()
     }

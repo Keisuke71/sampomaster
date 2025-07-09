@@ -2,6 +2,10 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>NSHealthUpdateUsageDescription</key>
+	<string>歩数と距離を HealthKit に保存するために必要です</string>
+	<key>NSHealthShareUsageDescription</key>
+	<string>歩数と距離を取得するために必要です</string>
 	<key>OPENWEATHER_API_KEY</key>
 	<string>$(OPENWEATHER_API_KEY)</string>
 	<key>NSLocationWhenInUseUsageDescription</key>

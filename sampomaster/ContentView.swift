@@ -119,14 +119,23 @@ struct ContentView: View {
             .padding()
             .onAppear {
                 // 画面が現れたタイミングで自動取得
+                HealthKitManager.shared.requestAuthorization{success, _ in
+                    if success {
+                        TotalDataManager.shared.fetchTotalSteps()
+                        TotalDataManager.shared.fetchTotalDistance()
+                    }
+                }
                 viewModel.requestAuthorization()
                 viewModel.fetchTodayStepCount()
                 viewModel.fetchTodayWalkingDistance()
                 viewModel.fetchLatestWeight()
+                
             }
             //画面遷移時（ホーム画面等から戻ってきた時）に更新
             .onChange(of: scenePhase) { oldPhase, newPhase in
                 if newPhase == .active {
+                    TotalDataManager.shared.fetchTotalSteps()
+                    TotalDataManager.shared.fetchTotalDistance()
                     viewModel.fetchTodayStepCount()
                     viewModel.fetchTodayWalkingDistance()
                     viewModel.fetchLatestWeight()
@@ -134,6 +143,8 @@ struct ContentView: View {
             }
             .refreshable {
                 // プル後の更新処理
+                TotalDataManager.shared.fetchTotalSteps()
+                TotalDataManager.shared.fetchTotalDistance()
                 viewModel.fetchTodayStepCount()
                 viewModel.fetchTodayWalkingDistance()
                 viewModel.fetchLatestWeight()

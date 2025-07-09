@@ -14,6 +14,7 @@ class StepCountViewModel: ObservableObject {
     @Published var weight: Double?
     @Published var calories: Int = 0
     static let shared = StepCountViewModel()
+    private let defaults = UserDefaults.standard
     
     /// HealthKitの許可をリクエスト
     func requestAuthorization() {

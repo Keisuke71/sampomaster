@@ -39,7 +39,7 @@ struct MainTabView: View {
                     .tabItem {
                         Label("ホーム", systemImage: "house")
                     }
-                StepHistoryView()
+                StatsTabView()
                     .tabItem{
                         Label("統計", systemImage: "chart.bar.xaxis")
                     }

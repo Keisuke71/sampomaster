@@ -18,6 +18,8 @@ struct DailyStepRecord: Identifiable {
 // MARK: - ViewModel
 /// 過去歩数履歴を取得する ViewModel
 class StepHistoryViewModel: ObservableObject {
+    static let shared = StepHistoryViewModel()
+    
     @Published var dailySteps: [DailyStepRecord] = []
     private let healthStore = HKHealthStore()
 

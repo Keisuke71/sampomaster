@@ -12,7 +12,7 @@ class HealthKitManager {
     private let healthStore = HKHealthStore()
     private var stepObserverQuery: HKObserverQuery?
     private var distanceObserverQuery: HKObserverQuery?
-
+    
     /// HealthKitの使用許可をリクエスト
     func requestAuthorization(completion: @escaping (Bool, Error?) -> Void) {
         guard HKHealthStore.isHealthDataAvailable(),
@@ -25,7 +25,7 @@ class HealthKitManager {
         }
         healthStore.requestAuthorization(toShare: [], read: [stepType, distanceType, weightType], completion: completion)
     }
-
+    
     /// 今日の歩数合計を取得
     func fetchTodayStepCount(completion: @escaping (Int?, Error?) -> Void) {
         guard HKHealthStore.isHealthDataAvailable(),
@@ -57,31 +57,31 @@ class HealthKitManager {
     
     //今日の歩数（メートル）を取得
     func fetchTodayWalkingDistance(completion: @escaping (Double?, Error?) -> Void) {
-            guard HKHealthStore.isHealthDataAvailable(),
-                  let distanceType = HKQuantityType.quantityType(forIdentifier: .distanceWalkingRunning)
-            else {
-                completion(nil, nil)
-                return
+        guard HKHealthStore.isHealthDataAvailable(),
+              let distanceType = HKQuantityType.quantityType(forIdentifier: .distanceWalkingRunning)
+        else {
+            completion(nil, nil)
+            return
+        }
+        let startOfDay = Calendar.current.startOfDay(for: Date())
+        let predicate = HKQuery.predicateForSamples(
+            withStart: startOfDay,
+            end: Date(),
+            options: .strictStartDate
+        )
+        let query = HKStatisticsQuery(
+            quantityType: distanceType,
+            quantitySamplePredicate: predicate,
+            options: .cumulativeSum
+        ) { _, result, error in
+            if let sum = result?.sumQuantity() {
+                let meters = sum.doubleValue(for: HKUnit.meter())
+                completion(meters, nil)
+            } else {
+                completion(nil, error)
             }
-            let startOfDay = Calendar.current.startOfDay(for: Date())
-            let predicate = HKQuery.predicateForSamples(
-                withStart: startOfDay,
-                end: Date(),
-                options: .strictStartDate
-            )
-            let query = HKStatisticsQuery(
-                quantityType: distanceType,
-                quantitySamplePredicate: predicate,
-                options: .cumulativeSum
-            ) { _, result, error in
-                if let sum = result?.sumQuantity() {
-                    let meters = sum.doubleValue(for: HKUnit.meter())
-                    completion(meters, nil)
-                } else {
-                    completion(nil, error)
-                }
-            }
-            healthStore.execute(query)
+        }
+        healthStore.execute(query)
     }
     
     func fetchLatestWeight(completion: @escaping (Double?, Error?) -> Void) {
@@ -109,30 +109,58 @@ class HealthKitManager {
         }
         healthStore.execute(query)
     }
-}
-
-extension HealthKitManager {
-    func fetchStepCount(from start: Date,
-                          to end: Date = Date(),
-                          completion: @escaping (Int, Error?) -> Void) {
-        guard let type = HKQuantityType.quantityType(forIdentifier: .stepCount) else {
-          completion(0, nil); return
+    
+    // MARK: - Cumulative Queries
+    /// 指定期間の累計を返すユーティリティ（noDataは0扱い）
+    func fetchCumulativeSum(
+        identifier: HKQuantityTypeIdentifier,
+        unit: HKUnit,
+        from start: Date,
+        to end: Date = Date(),
+        completion: @escaping (Double, Error?) -> Void
+    ) {
+        guard let type = HKQuantityType.quantityType(forIdentifier: identifier) else {
+            completion(0, nil)
+            return
         }
-        let predicate = HKQuery.predicateForSamples(
-          withStart: start,
-          end: end,
-          options: .strictStartDate
-        )
+        let predicate = HKQuery.predicateForSamples(withStart: start, end: end, options: [])
         let query = HKStatisticsQuery(
-          quantityType: type,
-          quantitySamplePredicate: predicate,
-          options: .cumulativeSum
+            quantityType: type,
+            quantitySamplePredicate: predicate,
+            options: .cumulativeSum
         ) { _, result, error in
-          let count = result?.sumQuantity()?.doubleValue(for: .count()) ?? 0
-          completion(Int(count), error)
+            var value = 0.0
+            if let sum = result?.sumQuantity() {
+                value = sum.doubleValue(for: unit)
+            } else if let hkError = error as? HKError, hkError.code == .errorNoData {
+                value = 0.0
+            }
+            completion(value, nil)
         }
         healthStore.execute(query)
-      }
+    }
+    
+    /// 起点日時から総歩数を取得
+    func fetchTotalSteps(
+        from start: Date,
+        to end: Date = Date(),
+        completion: @escaping (Int, Error?) -> Void
+    ) {
+        fetchCumulativeSum(identifier: .stepCount, unit: .count(), from: start, to: end) { value, _ in
+            completion(Int(value), nil)
+        }
+    }
+    
+    /// 起点日時から総距離を取得
+    func fetchTotalDistance(
+        from start: Date,
+        to end: Date = Date(),
+        completion: @escaping (Double, Error?) -> Void
+    ) {
+        fetchCumulativeSum(identifier: .distanceWalkingRunning, unit: .meter(), from: start, to: end, completion: completion)
+    }
+}
+extension HealthKitManager {
     /// バックグラウンドでの歩数・距離更新を有効化
     func enableStepBackgroundDelivery() {
         guard let stepType = HKObjectType.quantityType(forIdentifier: .stepCount),
