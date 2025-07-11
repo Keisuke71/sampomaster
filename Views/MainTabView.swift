@@ -31,6 +31,11 @@ struct MainTabView: View {
                     .tabItem {
                         Label("その他", systemImage: "gearshape.2")
                     }
+                TrainingRecordView()
+                    .tabItem {
+                        Image(systemName: "figure.strengthtraining.traditional")
+                        Text("筋トレ")
+                        }
             }
         }
         .onAppear {

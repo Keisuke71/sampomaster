@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		7D72DC512E20C81C0027D802 /* TrainingFeature.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D72DC502E1F57B00027D802 /* TrainingFeature.swift */; };
 		7DC024BC2E1DF3CA00E03B44 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 7DC024A32E1DF3CA00E03B44 /* Assets.xcassets */; };
 		7DC024BE2E1DF3CA00E03B44 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DC024B12E1DF3CA00E03B44 /* SettingsView.swift */; };
 		7DC024C02E1DF3CA00E03B44 /* PrimaryButtonStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DC024AC2E1DF3CA00E03B44 /* PrimaryButtonStyle.swift */; };
@@ -58,6 +59,7 @@
 		7D08A98C2DBC78FC004E6C49 /* .gitignore */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitignore; sourceTree = "<group>"; };
 		7D08A98E2DBC7993004E6C49 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		7D08A9912DBC96C7004E6C49 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		7D72DC502E1F57B00027D802 /* TrainingFeature.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrainingFeature.swift; sourceTree = "<group>"; };
 		7DC024A32E1DF3CA00E03B44 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		7DC024A42E1DF3CA00E03B44 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		7DC024A52E1DF3CA00E03B44 /* GoalEditorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoalEditorView.swift; sourceTree = "<group>"; };
@@ -197,6 +199,7 @@
 		7DC024F42E1E1A2B00E03B44 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				7DC024A32E1DF3CA00E03B44 /* Assets.xcassets */,
 			);
 			path = Resources;
 			sourceTree = "<group>";
@@ -204,7 +207,7 @@
 		7DC024F72E1E1AB000E03B44 /* Services */ = {
 			isa = PBXGroup;
 			children = (
-				7DC024A32E1DF3CA00E03B44 /* Assets.xcassets */,
+				7D72DC502E1F57B00027D802 /* TrainingFeature.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -368,6 +371,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				7D72DC512E20C81C0027D802 /* TrainingFeature.swift in Sources */,
 				7DC024BE2E1DF3CA00E03B44 /* SettingsView.swift in Sources */,
 				7DC024DD2E1E16EE00E03B44 /* CurrencyViewModel.swift in Sources */,
 				7DC024C02E1DF3CA00E03B44 /* PrimaryButtonStyle.swift in Sources */,

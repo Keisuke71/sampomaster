@@ -16,8 +16,13 @@ struct HeaderTabView: View {
         HStack(alignment: .center, spacing: 24) {
             // ランク表示
             VStack(spacing: 8) {
-                Text("ランク: \(rankManager.currentRank)")
-                    .font(.title2.bold())
+                HStack(spacing: 4){
+                    Image(systemName: "star.fill")
+                        .foregroundColor(.yellow)
+                    Text("ランク \(rankManager.currentRank)")
+                        .font(.headline)
+                }
+
                 ProgressView(value: rankManager.progress) {
                     Text("次のランクまで")
                         .font(.caption)
@@ -47,8 +52,26 @@ struct HeaderTabView: View {
                         .font(.subheadline).bold()
                 }
             }
-            .frame(maxWidth: .infinity)  // 幅を均等に
+            .frame(maxWidth: .infinity,alignment: .leading)  // 幅を均等に
             .padding()
+            
+            //トースト
+            if currencyVM.showCrystalToast {
+                            HStack(spacing: 8) {
+                                Image("Cur_Crystal")
+                                    .resizable()
+                                    .frame(width: 20, height: 20)
+                                Text("⚪️ \(currencyVM.lastAwardedAmount) 入手しました！")
+                                    .font(.subheadline).bold()
+                            }
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 8)
+                            .background(Color(.systemGray6))
+                            .cornerRadius(8)
+                            .shadow(radius: 4)
+                            .padding(.top, 80) // ヘッダーの少し下
+                            .transition(.move(edge: .top).combined(with: .opacity))
+                        }
         }
         .background(Color(UIColor.systemBackground).shadow(radius: 2))
     }
