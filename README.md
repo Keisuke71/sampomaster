@@ -33,7 +33,7 @@
 1. このリポジトリをクローン
 
    ```bash
-   git clone https://github.com/ユーザー名/sampomaster.git
+   git clone https://github.com/Keisuke71/sampomaster.git
    cd sampomaster
    ```
 2. Xcode で `.xcodeproj` または `.xcworkspace` を開く
