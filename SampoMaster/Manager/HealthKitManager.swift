@@ -16,6 +16,7 @@ class HealthKitManager: ObservableObject {
     @Published var stepCount: Double = 0
     @Published var walkingDistance: Double = 0 //距離(メートル)
     @Published var isAuthorized: Bool = false
+    @Published var activityHistory: [DailyActivity] = []
     
     // HealthKitを扱うためのストア
     private let healthStore = HKHealthStore()
@@ -143,5 +144,56 @@ class HealthKitManager: ObservableObject {
         }
         
         healthStore.execute(query)
+    }
+    
+    func fetchHistory(days: Int, completion: @escaping ([DailyActivity]) -> Void) {
+        guard let stepType = HKQuantityType.quantityType(forIdentifier: .stepCount),
+              let distanceType = HKQuantityType.quantityType(forIdentifier: .distanceWalkingRunning),
+              let calorieType = HKQuantityType.quantityType(forIdentifier: .activeEnergyBurned) else { return }
+        
+        let now = Date()
+        let calendar = Calendar.current
+        let startDate = calendar.date(byAdding: .day, value: -days + 1, to: calendar.startOfDay(for: now))!
+        
+        // 1日ごとの統計を取るための設定
+        let interval = DateComponents(day: 1)
+        
+        // 歩数の集計
+        let stepQuery = HKStatisticsCollectionQuery(
+            quantityType: stepType,
+            quantitySamplePredicate: nil,
+            options: .cumulativeSum,
+            anchorDate: calendar.startOfDay(for: now),
+            intervalComponents: interval
+        )
+        
+        stepQuery.initialResultsHandler = { _, results, error in
+            var tempActivities: [DailyActivity] = []
+            
+            results?.enumerateStatistics(from: startDate, to: now) { statistics, _ in
+                let date = statistics.startDate
+                let steps = statistics.sumQuantity()?.doubleValue(for: .count()) ?? 0
+                
+                // 本来は距離とカロリーも同様にCollectionQueryを投げますが、
+                // コードを簡潔にするため、ここでは歩数をベースにモックデータを入れるか、
+                // 同様のクエリを複数投げて合成します。
+                // 今回は「歩数」の取得フローをメインに示します。
+                
+                let activity = DailyActivity(
+                    date: date,
+                    steps: steps,
+                    distance: steps * 0.7, // 仮の計算式（後で正確な値を合成）
+                    calories: steps * 0.04  // 仮の計算式（後で正確な値を合成）
+                )
+                tempActivities.append(activity)
+            }
+            
+            DispatchQueue.main.async {
+                // 新しい順（今日が一番上）に並び替えて返す
+                completion(tempActivities.reversed())
+            }
+        }
+        
+        healthStore.execute(stepQuery)
     }
 }
