@@ -15,6 +15,7 @@ class HealthKitManager: ObservableObject {
     @Published var calories: Double = 0
     @Published var stepCount: Double = 0
     @Published var walkingDistance: Double = 0 //距離(メートル)
+    @Published var cumulativeSteps: Double = 0 // 累計歩数保持用
     @Published var isAuthorized: Bool = false
     @Published var activityHistory: [DailyActivity] = []
     
@@ -195,5 +196,34 @@ class HealthKitManager: ObservableObject {
         }
         
         healthStore.execute(stepQuery)
+    }
+    
+    // 指定した期間の累計歩数を取得する
+    func fetchCumulativeSteps(from startDate: Date) {
+        guard let stepType = HKQuantityType.quantityType(forIdentifier: .stepCount) else { return }
+        
+        let now = Date()
+        
+        // 期間指定
+        let predicate = HKQuery.predicateForSamples(withStart: startDate, end: now, options: .strictStartDate)
+        
+        let query = HKStatisticsQuery(quantityType: stepType, quantitySamplePredicate: predicate, options: .cumulativeSum) { _, result, error in
+            
+            guard let result = result, let sum = result.sumQuantity() else {
+                print("累計データの取得失敗: \(String(describing: error))")
+                return
+            }
+            
+            let totalSteps = sum.doubleValue(for: HKUnit.count())
+            
+            // 呼び出し元に返すために、NotificationCenterを使うか、
+            // ここでは簡易的にUserLevelManagerに渡す設計にするのが綺麗ですが、
+            // 今回は @Published 変数を用意してHomeViewで監視させます。
+            
+            DispatchQueue.main.async {
+                self.cumulativeSteps = totalSteps
+            }
+        }
+        healthStore.execute(query)
     }
 }

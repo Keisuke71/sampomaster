@@ -1,18 +1,12 @@
-//
-//  SampoMasterApp.swift
-//  SampoMaster
-//
-//  Created by 松本 圭祐 on 2025/12/21.
-//
-
 import SwiftUI
 import SwiftData
 
 @main
 struct SampoMasterApp: App {
+    // データコンテナの定義
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
-            Item.self,
+            UserProgress.self, // ここにモデルを追加
         ])
         let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
 
@@ -27,6 +21,6 @@ struct SampoMasterApp: App {
         WindowGroup {
             ContentView()
         }
-        .modelContainer(sharedModelContainer)
+        .modelContainer(sharedModelContainer) // コンテナを注入
     }
 }
