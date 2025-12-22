@@ -5,6 +5,12 @@ struct HomeView: View {
     @ObservedObject var healthManager: HealthKitManager
     @StateObject private var levelManager = UserLevelManager()
     
+    // アプリの状態を監視する
+    @Environment(\.scenePhase) private var scenePhase
+    
+    // アプリ起動後、最初のHelathKitデータかどうか判定するフラグ
+    @State private var isFirstSync = true
+    
     // SwiftDataへのアクセス
     @Environment(\.modelContext) private var modelContext
     @Query private var userProgresses: [UserProgress]
@@ -77,6 +83,13 @@ struct HomeView: View {
             initializeDataIfNeeded()
             syncData()
         }
+        // アプリの状態が変わった時に実行される
+        .onChange(of: scenePhase) { newPhase in
+            if newPhase == .active {
+                //アプリがアクティブになった瞬間に実行
+                syncData()
+            }
+        }
         // HealthKitの累計歩数が更新されたら、ゲームデータと同期する
         .onReceive(healthManager.$cumulativeSteps) { currentTotalSteps in
             processStepUpdate(currentTotalSteps: currentTotalSteps)
@@ -110,9 +123,24 @@ struct HomeView: View {
         }
     }
     
-    // ★重要: 歩数の差分を計算して経験値にする処理
+    // ★歩数の差分を計算して経験値にする処理
     private func processStepUpdate(currentTotalSteps: Double) {
         guard let progress = userProgresses.first else { return }
+        
+        // HealthKitがまだ0を返している間は無視
+        guard currentTotalSteps > 0 else { return }
+        
+        // 初回同期の場合
+        if isFirstSync {
+            // 現在の歩数を同期済みとしてセットするだけで、経験値は加算しない
+            progress.lastSyncedSteps = currentTotalSteps
+            isFirstSync = false // 次回から差分計算を開始
+            print("初期ベースラインをセットしました: \(currentTotalSteps)")
+            
+            // 初回表示のために一度だけレベル計算をはしらせる
+            levelManager.updateDisplay(from: progress.totalExperience)
+            return
+        }
         
         // 前回の同期時より歩数が増えているか確認
         let diff = currentTotalSteps - progress.lastSyncedSteps
@@ -163,6 +191,9 @@ struct HomeView: View {
                     // リセットしたくない場合はこの2行をコメントアウトしてください
                     progress.totalExperience = 0
                     progress.lastSyncedSteps = 0
+                    
+                    // デバッグ後は初回同期として扱い、全量を加算させる
+                    isFirstSync = true
                 }
                 
                 syncData()
