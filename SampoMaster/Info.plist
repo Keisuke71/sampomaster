@@ -2,6 +2,8 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>UIUserInterfaceStyle</key>
+	<string>Light</string>
 	<key>NSHealthShareUsageDescription</key>
 	<string>ヘルスケアデータを取得して、アプリ内で使用します。</string>
 	<key>NSHealthUpdateUsageDescription</key>
