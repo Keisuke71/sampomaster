@@ -5,6 +5,8 @@ struct HomeView: View {
     @ObservedObject var healthManager: HealthKitManager
     @StateObject private var levelManager = UserLevelManager()
     
+    @State private var gameData = GameDataManager()
+    
     // アプリの状態を監視する
     @Environment(\.scenePhase) private var scenePhase
     
@@ -16,7 +18,10 @@ struct HomeView: View {
     @AppStorage("startDate") private var startDateTimestamp: Double = Date().timeIntervalSince1970
     
     @State private var showDebugSheet = false
-    @State private var tempDate = Date()
+    
+    //画面遷移フラグ
+    @State private var showExplorationMap = false
+    @State private var showStoryList = false
     
     // キャラのセリフを歩数に応じて決める計算プロパティ
         var characterDialogue: String {
@@ -36,66 +41,122 @@ struct HomeView: View {
         }
     
     var body: some View {
-        ZStack {
-            LinearGradient(gradient: Gradient(colors: [Color.blue.opacity(0.1), Color.white]), startPoint: .top, endPoint: .bottom)
-                .ignoresSafeArea()
-            
-            VStack {
-                // --- 上部エリア ---
-                HStack(alignment: .top, spacing: 15) {
-                    // レベルリング (長押しでデバッグ)
-                    LevelRingView(
-                        level: levelManager.level,
-                        progress: levelManager.progress,
-                        currentExp: levelManager.currentExp,
-                        nextLevelExp: levelManager.nextLevelExp
-                    )
-                    .onLongPressGesture {
-                        tempDate = Date(timeIntervalSince1970: startDateTimestamp)
-                        showDebugSheet = true
+            ZStack {
+                // --- 背景 ---
+                // 画像は画面いっぱいに広げる（タブバーの裏まで描画）
+                Image("S-TPIA_2")
+                    .resizable()
+                    .scaledToFill()
+                    .ignoresSafeArea()
+                
+                // --- コンテンツ ---
+                // コンテンツはセーフエリア内に収める（これでタブバーと被らない）
+                VStack(spacing: 0) {
+                    
+                    // --- ① ヘッダーエリア ---
+                    HStack(alignment: .center) {
+                        StaminaGauge(current: gameData.stamina, max: gameData.maxStamina)
+                            .frame(width: 180)
+                        
+                        Spacer()
+                        
+                        Button(action: { showDebugSheet = true }) {
+                            Image(systemName: "ladybug.fill")
+                                .font(.headline)
+                                .padding(8)
+                                .background(.black.opacity(0.5))
+                                .foregroundColor(.white)
+                                .clipShape(Circle())
+                        }
                     }
+                    .padding(.horizontal, 40) // ← 余白を増やして、左端に寄りすぎないように調整
+                    .padding(.top, 10)       // 上部のバランス調整
                     
-                    ActivitySummaryCard(healthManager: healthManager)
-                }
-                .padding(.horizontal)
-                .padding(.top, 10)
-                
-                Spacer()
-                
-                // --- キャラエリア ---
-                VStack(spacing: 15) {
-                    SpeechBubble(text: characterDialogue)
-                        .frame(maxWidth: 280)
-                        .animation(.easeInOut, value: characterDialogue)
+                    // --- ② ステータスエリア ---
+                    HStack(alignment: .top, spacing: 15) {
+                        LevelRingView(
+                            level: levelManager.level,
+                            progress: levelManager.progress,
+                            currentExp: levelManager.currentExp,
+                            nextLevelExp: levelManager.nextLevelExp
+                        )
+                        
+                        ActivitySummaryCard(healthManager: healthManager)
+                    }
+                    .scaleEffect(0.9)
+                    .padding(.horizontal)
+                    .padding(.top, 10)
                     
-                    Image("chara_ayumi_normal")
-                        .resizable()
-                        .scaledToFit()
-                        .frame(height: 420)
+                    Spacer() // 中央のスペース確保
+                    
+                    // --- ③ キャラクター & ボタンエリア ---
+                    ZStack(alignment: .bottom) {
+                        // キャラクター
+                        Image("chara_ayumi_normal")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(maxHeight: 380) // サイズ微調整
+                            .padding(.bottom, 60)  // ボタンより少し上に配置
+                        
+                        // 下部アクションボタン
+                        HStack(spacing: 20) {
+                            Button(action: { showStoryList = true }) {
+                                VStack(spacing: 0) {
+                                    Image(systemName: "book.fill").font(.subheadline)
+                                    Text("STORY").font(.caption2).fontWeight(.bold)
+                                }
+                                .frame(width: 70, height: 50)
+                                .background(.ultraThinMaterial)
+                                .foregroundColor(.white)
+                                .cornerRadius(10)
+                            }
+                            
+                            Button(action: { showExplorationMap = true }) {
+                                HStack {
+                                    Image(systemName: "map.fill")
+                                    Text("EXPLORE")
+                                        .fontWeight(.bold)
+                                        .font(.callout)
+                                }
+                                .frame(maxWidth: .infinity)
+                                .frame(height: 50)
+                                .background(Color.blue.opacity(0.85))
+                                .foregroundColor(.white)
+                                .cornerRadius(10)
+                                .shadow(radius: 4)
+                            }
+                        }
+                        .padding(.horizontal, 30)
+                        // ↓ 重要: タブバーがある場合、少し底上げしないとタップしにくい
+                        .padding(.bottom, 10)
+                    }
                 }
-                .padding(.bottom, 10)
+                // VStack自体には ignoresSafeArea をつけないことで、
+                // タブバー領域（画面下部）にはコンテンツが被らないようになる
             }
-        }
-        .onAppear {
-            initializeDataIfNeeded()
-            syncData()
-        }
-        // アプリの状態が変わった時に実行される
-        .onChange(of: scenePhase) { newPhase in
-            if newPhase == .active {
-                //アプリがアクティブになった瞬間に実行
+            .onAppear {
+                initializeDataIfNeeded()
                 syncData()
             }
+            .onChange(of: scenePhase) { newPhase in
+                if newPhase == .active { syncData() }
+            }
+            .onReceive(healthManager.$cumulativeSteps) { currentTotalSteps in
+                processStepUpdate(currentTotalSteps: currentTotalSteps)
+            }
+            .sheet(isPresented: $showDebugSheet) {
+                DebugView(gameData: gameData)
+            }
+            // 探索マップ（全画面）
+            .fullScreenCover(isPresented: $showExplorationMap) {
+                ExplorationView(gameData: gameData)
+            }
+            // ストーリーリスト（全画面に変更）
+            .fullScreenCover(isPresented: $showStoryList) {
+                // ここにストーリー画面（StoryListViewなど）を入れる
+                // 閉じるボタンが必要になるので注意
+            }
         }
-        // HealthKitの累計歩数が更新されたら、ゲームデータと同期する
-        .onReceive(healthManager.$cumulativeSteps) { currentTotalSteps in
-            processStepUpdate(currentTotalSteps: currentTotalSteps)
-        }
-        .sheet(isPresented: $showDebugSheet) {
-            debugSheetContent
-        }
-    }
-    
     // MARK: - ロジック部分
     
     // データがなければ作成する
@@ -158,39 +219,6 @@ struct HomeView: View {
             // 今回は「同期位置をリセット」して対応
             progress.lastSyncedSteps = currentTotalSteps
         }
-    }
-    
-    // デバッグシートの中身
-    var debugSheetContent: some View {
-        VStack {
-            Text("【デバッグ】計測開始日の変更")
-                .font(.headline)
-                .padding()
-            
-            DatePicker("開始日", selection: $tempDate, displayedComponents: .date)
-                .datePickerStyle(.graphical)
-                .padding()
-            
-            Button("この日付から再計算") {
-                startDateTimestamp = tempDate.timeIntervalSince1970
-                
-                // デバッグ時は「これまでの経験値をリセット」するか、
-                // 「今の経験値に上乗せ」するか選べますが、
-                // 今回はシンプルに再計算するためにリセット処理を入れます
-                if let progress = userProgresses.first {
-                    // リセットしたくない場合はこの2行をコメントアウトしてください
-                    progress.totalExperience = 0
-                    progress.lastSyncedSteps = 0
-                    
-                }
-                
-                syncData()
-                showDebugSheet = false
-            }
-            .buttonStyle(.borderedProminent)
-            .padding()
-        }
-        .presentationDetents([.medium])
     }
 }
 // MARK: - Sub Components (部品)
@@ -338,3 +366,5 @@ struct SpeechBubble: View {
             .shadow(radius: 4)
     }
 }
+
+// --- デバッグ専用画面 ---

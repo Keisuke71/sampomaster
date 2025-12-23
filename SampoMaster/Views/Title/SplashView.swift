@@ -20,9 +20,14 @@ struct SplashView: View {
                 Spacer()
                 
                 // 3. コピーライト (下部)
+                Text("Project ASTER: S-TPIA Defense Protocol")
+                    .font(.caption)
+                    .foregroundColor(.white)
+                    .padding(.bottom, 30)
+                
                 Text("©️2025 Project Sampomaster")
                     .font(.caption)
-                    .foregroundColor(.black) // 指定の黒文字
+                    .foregroundColor(.black)
                     .padding(.bottom, 30)
             }
         }
