@@ -142,10 +142,15 @@ struct HomeView: View {
                 if newPhase == .active { syncData() }
             }
             .onReceive(healthManager.$cumulativeSteps) { currentTotalSteps in
-                processStepUpdate(currentTotalSteps: currentTotalSteps)
+                // ここで新しい差分処理を呼ぶ
+                gameData.processStepsUpdate(
+                    currentCumulativeSteps: currentTotalSteps,
+                    levelManager: levelManager
+                )
             }
             .sheet(isPresented: $showDebugSheet) {
-                DebugView(gameData: gameData)
+                // gameData と levelManager を渡す
+                DebugView(gameData: gameData, levelManager: levelManager)
             }
             // 探索マップ（全画面）
             .fullScreenCover(isPresented: $showExplorationMap) {
@@ -175,10 +180,6 @@ struct HomeView: View {
         healthManager.fetchAllData()
         healthManager.fetchCumulativeSteps(from: start)
         
-        // 画面を開いた時点で、保存されている経験値をレベル表示に反映
-        if let progress = userProgresses.first {
-            levelManager.updateDisplay(from: progress.totalExperience)
-        }
     }
     
     // ★歩数の差分を計算して経験値にする処理
@@ -211,9 +212,6 @@ struct HomeView: View {
             } catch {
                 print("保存失敗: \(error)")
             }
-            
-            // 表示を更新
-            levelManager.updateDisplay(from: progress.totalExperience)
         } else if diff < 0 {
             // デバッグで日付を過去に戻した場合など、HKの歩数が減った場合の補正
             // 今回は「同期位置をリセット」して対応

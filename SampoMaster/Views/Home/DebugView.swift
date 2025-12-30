@@ -2,35 +2,27 @@ import SwiftUI
 
 struct DebugView: View {
     @Bindable var gameData: GameDataManager
+    
+    // LevelManagerを受け取れるように追加
+    @ObservedObject var levelManager: UserLevelManager
+    // var healthManager: HealthKitManager // HealthKitへの書き込みはしないので不要になりました
+    
     @Environment(\.dismiss) var dismiss
     
-    // 入力用の一時ステート
-    @State private var targetDate: Date = Date()
+    // 入力用
     @State private var inputSteps: String = "1000"
     
+    // 日付操作系はもう不要なら削除してもOKですが、
+    // 残す場合はそのまま置いておいてください
+    @State private var targetDate: Date = Date()
+
     var body: some View {
         NavigationStack {
             Form {
-                // MARK: - 日付操作セクション
-                Section(header: Text("タイムトラベル設定")) {
-                    DatePicker("シミュレート日付", selection: $targetDate, displayedComponents: .date)
-                        .datePickerStyle(.compact)
-                        .onChange(of: targetDate) { _, newDate in
-                            // 日付が変わったら即座にマネージャーに反映
-                            gameData.setDebugDate(newDate)
-                        }
-                    
-                    Button("今日（現在時刻）に戻す") {
-                        targetDate = Date()
-                        gameData.resetDebugMode()
-                    }
-                    .disabled(gameData.debugDate == nil)
-                }
-                
-                // MARK: - 歩数操作セクション
-                Section(header: Text("歩数追加シミュレーション")) {
+                // MARK: - 歩数・経験値追加
+                Section(header: Text("デバッグ操作")) {
                     HStack {
-                        TextField("追加歩数", text: $inputSteps)
+                        TextField("追加する歩数(Exp)", text: $inputSteps)
                             .keyboardType(.numberPad)
                             .multilineTextAlignment(.trailing)
                         Text("歩")
@@ -38,56 +30,48 @@ struct DebugView: View {
                     
                     Button(action: {
                         if let steps = Int(inputSteps) {
+                            // 1. スタミナを加算 (GameDataManager)
                             gameData.debugAddSteps(steps)
-                            // 触覚フィードバック
+                            
+                            // 2. 経験値を加算してレベルアップ判定 (LevelManager)
+                            levelManager.debugAddExperience(amount: steps)
+                            
+                            // 完了フィードバック
                             let generator = UINotificationFeedbackGenerator()
                             generator.notificationOccurred(.success)
                         }
                     }) {
                         HStack {
                             Image(systemName: "figure.walk")
-                            Text("歩数を追加してスタミナ変換")
+                            Text("歩数を追加 (スタミナ＆Exp)")
+                            Spacer()
                         }
                     }
                     .buttonStyle(.borderedProminent)
                 }
                 
-                // MARK: - ステータス確認
-                Section(header: Text("現在の内部データ")) {
-                    LabeledContent("現在の日付設定", value: gameData.getTodayString())
-                    LabeledContent("スタミナ", value: String(format: "%.1f / %.0f", gameData.stamina, gameData.maxStamina))
-                    LabeledContent("前回変換時の歩数", value: "\(gameData.lastConvertedSteps) 歩")
-                    LabeledContent("最終同期日", value: gameData.lastSyncDate)
-                }
-                
-                // MARK: - リセット系
-                Section {
-                    Button("スタミナ全回復", action: { gameData.stamina = gameData.maxStamina })
-                    Button("スタミナを0にする", action: { gameData.stamina = 0 }).foregroundColor(.red)
-                }
-                
-                Section("パラメーター操作") {
-                    // レベル操作を追加
-                    Stepper("プレイヤーLv: \(gameData.playerLevel)", value: $gameData.playerLevel, in: 1...99)
+                // MARK: - パラメーター直接操作
+                Section(header: Text("ステータス操作")) {
+                    Stepper("プレイヤーLv: \(levelManager.level)", value: $levelManager.level, in: 1...Int.max)
                     
                     Button("スタミナ全回復") {
-                        // 全回復は maxStamina に合わせる
                         gameData.stamina = gameData.maxStamina
                     }
-                    
-                    // アイテムによる限界突破テスト用
-                    Button("スタミナ石で回復 (+100 突破可)") {
-                        gameData.useStaminaPotion(amount: 100)
+                    Button("スタミナを0にする") {
+                        gameData.stamina = 0
                     }
-                    .foregroundColor(.purple)
+                    .foregroundColor(.red)
                 }
-                .navigationTitle("デバッグルーム")
-                .scrollDismissesKeyboard(.interactively)
-                .onAppear {
-                    // 画面を開いたときに、現在設定されているデバッグ日付（または今日）をDatePickerに反映
-                    targetDate = gameData.currentDate
+                
+                // MARK: - 情報表示
+                Section(header: Text("現在の状態")) {
+                    LabeledContent("現在レベル", value: "\(levelManager.level)")
+                    LabeledContent("次のLvまで", value: "\(Int(levelManager.nextLevelExp - levelManager.currentExp)) Exp")
+                    LabeledContent("スタミナ", value: "\(Int(gameData.stamina)) / \(Int(gameData.maxStamina))")
                 }
             }
+            .navigationTitle("デバッグルーム")
+            .scrollDismissesKeyboard(.interactively)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button("閉じる") { dismiss() }

@@ -67,7 +67,7 @@ struct ExplorationView: View {
                         )
                         .shadow(color: .black.opacity(0.3), radius: 4, x: 0, y: 2)
                     }
-                    .padding(.leading, 100) // 左端からの余白
+                    .padding(.leading, 70) // 左端からの余白
                     .padding(.top, 10)     // 上端からの余白
                     
                     Spacer() // 右に押しやる

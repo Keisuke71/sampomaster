@@ -1,120 +1,8 @@
 import Foundation
+import SwiftUI
 import Observation
-import HealthKit
 
-@Observable
-class GameDataManager {
-    // MARK: - プレイヤー基本ステータス
-    var playerLevel: Int = 1
-    
-    // 現在のスタミナ（上限を超えて保持可能）
-    var stamina: Double = 0.0
-    
-    var combatRank: Int = 1
-var gatheringRank: Int = 1
-    
-    // MARK: - スタミナ上限の計算ロジック
-    // 「基本1000 + レベル×10 + 装備補正」で自動計算する
-    
-    var baseMaxStamina: Double = 1000.0
-    var equipmentMaxStaminaBonus: Double = 0.0 // 将来の装備用
-    
-    // 計算型プロパティ：誰かが maxStamina を参照するたびに計算し直す
-    var maxStamina: Double {
-        let levelBonus = Double(playerLevel) * 10.0
-        return baseMaxStamina + levelBonus + equipmentMaxStaminaBonus
-    }
-    
-    // MARK: - 設定値
-    // 10歩で1スタミナ
-    let stepsPerStamina: Double = 10.0
-    
-    // MARK: - 内部管理用
-    var lastConvertedSteps: Int {
-        get { UserDefaults.standard.integer(forKey: "LastConvertedSteps") }
-        set { UserDefaults.standard.set(newValue, forKey: "LastConvertedSteps") }
-    }
-    
-    var lastSyncDate: String {
-        get { UserDefaults.standard.string(forKey: "LastSyncDate") ?? "" }
-        set { UserDefaults.standard.set(newValue, forKey: "LastSyncDate") }
-    }
-    
-    // デバッグ用
-    var debugDate: Date? = nil
-    var currentDate: Date { debugDate ?? Date() }
-
-    // MARK: - 歩数 → スタミナ変換（仕様変更反映）
-    
-    func convertStepsToStamina(todayTotalSteps: Int) {
-        let todayStr = getTodayString()
-        
-        // 日付変更チェック
-        if lastSyncDate != todayStr {
-            lastConvertedSteps = 0
-            lastSyncDate = todayStr
-        }
-        
-        // 差分（新規歩数）の計算
-        let newSteps = max(0, todayTotalSteps - lastConvertedSteps)
-        
-        if newSteps > 0 {
-            // 10歩 = 1スタミナ
-            let gainedStamina = Double(newSteps) / stepsPerStamina
-            
-            // 【重要】オーバーフロー制御のロジック
-            // 現在スタミナが上限未満の場合のみ、回復を受け付ける
-            if stamina < maxStamina {
-                let potentialStamina = stamina + gainedStamina
-                
-                // 歩数による回復は、最大値（maxStamina）で止まる（＝溢れない）
-                // ただし、すでにアイテム等で maxStamina を超えている場合は、何もしない（減らしもしない）
-                stamina = min(maxStamina, potentialStamina)
-                
-                print("歩数反映: +\(newSteps)歩 -> スタミナ回復 (現在: \(String(format: "%.1f", stamina)) / \(Int(maxStamina)))")
-            } else {
-                print("歩数反映スキップ: スタミナが上限に達しているため回復しません")
-            }
-            
-            // スタミナが増えても増えなくても、「歩いた分の計算は終わった」として記録更新
-            lastConvertedSteps = todayTotalSteps
-        }
-    }
-    
-    // MARK: - アイテム使用（例）
-    
-    /// スタミナ回復アイテムを使う（こちらは上限を超えて回復可能）
-    func useStaminaPotion(amount: Double) {
-        stamina += amount
-        print("アイテム使用: スタミナ +\(amount) (現在: \(String(format: "%.1f", stamina)))")
-    }
-    
-    // MARK: - ユーティリティ
-    
-    func getTodayString() -> String {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "yyyy-MM-dd"
-        return formatter.string(from: currentDate)
-    }
-    
-    // MARK: - デバッグ機能
-    
-    func setDebugDate(_ date: Date) { debugDate = date }
-    func resetDebugMode() { debugDate = nil }
-    
-    func debugAddSteps(_ steps: Int) {
-        let simulatedTotalSteps = lastConvertedSteps + steps
-        convertStepsToStamina(todayTotalSteps: simulatedTotalSteps)
-    }
-    
-    // レベルアップのテスト用
-    func debugLevelUp() {
-        playerLevel += 1
-        print("レベルアップ！ Lv.\(playerLevel) Maxスタミナ -> \(Int(maxStamina))")
-    }
-}
-
-// --- データ定義 ---
+// MARK: - データ定義構造体 (クラスの外に出してアクセスしやすくします)
 
 /// マップ上の探索ポイント
 struct ExplorationPoint: Identifiable {
@@ -130,19 +18,181 @@ struct StoryMission: Identifiable {
     let id: Int
     let title: String
     let summary: String
-    let rewardSteps: Int // クリア報酬（歩数/スタミナなど）
+    let rewardSteps: Int
 }
 
-// --- マップデータ ---
-
-// 拡張機能としてデータを持たせる
-extension GameDataManager {
+@Observable
+class GameDataManager {
     
-    // 現在のストーリー進行度（0: チュートリアル前, 1: 第1話クリア...）
-    // ※実際は UserDefaults で保存すべきですが、今は変数で
-    // var currentStoryProgress: Int = 0 // ← クラス内に定義してください
+    // MARK: - プレイヤー基本ステータス
+    // UserLevelManagerのレベルを表示用に同期して保持する
+    var playerLevel: Int = 1
     
-    // 全ミッションのリスト
+    // ランクシステム（戦闘・採集）
+    var combatRank: Int = 1
+    var gatheringRank: Int = 1
+    
+    // 現在のスタミナ
+    var stamina: Double = 0.0
+    
+    // スタミナ設定
+    // ★修正: 10歩で1スタミナ
+    let stepsPerStamina: Double = 10.0
+    
+    var baseMaxStamina: Double = 1000.0 // 基礎値
+    // 計算プロパティ: レベルに応じて上限が増える
+    var maxStamina: Double {
+        let levelBonus = Double(playerLevel) * 10.0 // レベル×10 加算
+        return baseMaxStamina + levelBonus
+    }
+    
+    // MARK: - 内部管理用 (差分計算システム)
+    
+    // 最後に同期した時点でのHealthKit「累計」歩数
+    private var lastSyncedCumulativeSteps: Double = 0
+    
+    // 最後にログインした日付 (日付変更判定用)
+    private var lastLoginDate: Date = Date()
+    
+    // デバッグ用日付操作
+    var debugDate: Date? = nil
+    var currentDate: Date { debugDate ?? Date() }
+    
+    // MARK: - 保存キー定義
+    private let kStaminaKey = "SavedStamina"
+    private let kCombatRankKey = "CombatRank"
+    private let kGatheringRankKey = "GatheringRank"
+    private let kLastSyncedStepsKey = "LastSyncedSteps"
+    private let kLastLoginDateKey = "LastLoginDate"
+    
+    // MARK: - 初期化
+    init() {
+        loadData()
+    }
+    
+    // MARK: - メインロジック: 歩数同期 & 差分反映
+    
+    /// HealthKitの累計歩数を受け取り、前回からの差分を計算してスタミナと経験値にする
+    func processStepsUpdate(currentCumulativeSteps: Double, levelManager: UserLevelManager) {
+        
+        // 1. レベルの同期 (表示用)
+        self.playerLevel = levelManager.level
+        
+        // 2. 初回起動時などのガード処理
+        if lastSyncedCumulativeSteps == 0 {
+            lastSyncedCumulativeSteps = currentCumulativeSteps
+            saveData()
+            return
+        }
+        
+        // 3. 差分を計算 (今回 - 前回)
+        let diff = currentCumulativeSteps - lastSyncedCumulativeSteps
+        
+        // 4. 歩数が増えている場合のみ処理
+        if diff > 0 {
+            print("【Game】差分検知: +\(Int(diff))歩")
+            
+            // --- A. スタミナ回復 ---
+            // 10歩で1スタミナ回復
+            let gainedStamina = diff / stepsPerStamina
+            addStamina(amount: gainedStamina)
+            
+            // --- B. 経験値加算 ---
+            // LevelManagerに「増えた分」を渡して処理してもらう
+            levelManager.addExperience(amount: Int(diff))
+            
+            // レベルアップした可能性があるので、表示用レベルを再取得
+            self.playerLevel = levelManager.level
+            
+            // 5. 処理が終わったら「ここまで処理済み」として更新して保存
+            lastSyncedCumulativeSteps = currentCumulativeSteps
+            saveData()
+        }
+        
+        // 5. 日付変更チェック (ログインボーナス等)
+        checkDailyReset()
+    }
+    
+    // MARK: - スタミナ管理
+    
+    /// スタミナを回復させる（上限maxStaminaまで）
+    func addStamina(amount: Double) {
+        if stamina < maxStamina {
+            stamina += amount
+            if stamina > maxStamina {
+                stamina = maxStamina
+            }
+            saveData() // 回復時も保存
+        }
+    }
+    
+    /// スタミナを消費する（足りなければ false を返す）
+    func consumeStamina(amount: Double) -> Bool {
+        if stamina >= amount {
+            stamina -= amount
+            saveData() // 消費したら即保存
+            return true
+        } else {
+            return false
+        }
+    }
+    
+    // MARK: - 日付変更・ログインボーナス処理
+    
+    private func checkDailyReset() {
+        let calendar = Calendar.current
+        // 保存されている最終ログイン日と「今日」が違う場合
+        if !calendar.isDateInToday(lastLoginDate) {
+            print("【Game】日付変更を検知！ (前回: \(lastLoginDate))")
+            
+            // --- ここにログインボーナス処理 ---
+            
+            // 日付を更新して保存
+            lastLoginDate = Date()
+            saveData()
+        }
+    }
+    
+    // MARK: - デバッグ機能
+    
+    func setDebugDate(_ date: Date) { debugDate = date }
+    func resetDebugMode() { debugDate = nil }
+    
+    func debugAddSteps(_ steps: Int) {
+        // デバッグ時は直接スタミナを増やす(10歩=1スタミナ換算)
+        let gained = Double(steps) / stepsPerStamina
+        addStamina(amount: gained)
+    }
+    
+    // MARK: - データ保存/読み込み (UserDefaults)
+    
+    private func saveData() {
+        let defaults = UserDefaults.standard
+        defaults.set(stamina, forKey: kStaminaKey)
+        defaults.set(combatRank, forKey: kCombatRankKey)
+        defaults.set(gatheringRank, forKey: kGatheringRankKey)
+        defaults.set(lastSyncedCumulativeSteps, forKey: kLastSyncedStepsKey)
+        defaults.set(lastLoginDate, forKey: kLastLoginDateKey)
+    }
+    
+    private func loadData() {
+        let defaults = UserDefaults.standard
+        self.stamina = defaults.double(forKey: kStaminaKey)
+        self.combatRank = defaults.integer(forKey: kCombatRankKey)
+        if self.combatRank == 0 { self.combatRank = 1 } // 初期値
+        
+        self.gatheringRank = defaults.integer(forKey: kGatheringRankKey)
+        if self.gatheringRank == 0 { self.gatheringRank = 1 } // 初期値
+        
+        self.lastSyncedCumulativeSteps = defaults.double(forKey: kLastSyncedStepsKey)
+        
+        if let date = defaults.object(forKey: kLastLoginDateKey) as? Date {
+            self.lastLoginDate = date
+        }
+    }
+    
+    // MARK: - マップ・ミッションデータ定義
+    
     var allMissions: [StoryMission] {
         [
             StoryMission(id: 1, title: "Episode 0: 始動", summary: "周辺の静止濃度が上昇しています。まずは近場の『旧市街地・東』へ向かい、状況を確認してください。", rewardSteps: 500),
@@ -150,7 +200,6 @@ extension GameDataManager {
         ]
     }
     
-    // 全エリアのリスト
     var allLocations: [ExplorationPoint] {
         [
             // S-TPIA（拠点）
@@ -165,13 +214,5 @@ extension GameDataManager {
             // さらに奥地
             ExplorationPoint(id: "ruins", name: "産業廃棄区画", description: "危険度高。強力な静止反応あり。", coordinate: CGPoint(x: 150, y: 80), requiredStoryId: 2)
         ]
-    }
-    
-    /// ストーリーを進める（デバッグ用・クリア処理用）
-    func completeMission(missionId: Int) {
-        if playerLevel <= missionId { // 簡易的な進行管理
-            // currentStoryProgress = missionId // ← クラス内の変数を使う
-            print("ミッション \(missionId) クリア！ 新しいエリアが解放されました。")
-        }
     }
 }

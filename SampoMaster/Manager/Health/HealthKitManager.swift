@@ -8,22 +8,20 @@
 import Foundation
 import HealthKit
 
-// データをUIに伝えるために ObservableObject に準拠させる
 class HealthKitManager: ObservableObject {
     
-    // UI側で監視したいデータには @Published をつける
+    // UI監視用
     @Published var calories: Double = 0
     @Published var stepCount: Double = 0
-    @Published var walkingDistance: Double = 0 //距離(メートル)
-    @Published var cumulativeSteps: Double = 0 // 累計歩数保持用
+    @Published var walkingDistance: Double = 0
+    @Published var cumulativeSteps: Double = 0
     @Published var isAuthorized: Bool = false
     @Published var activityHistory: [DailyActivity] = []
     
-    // HealthKitを扱うためのストア
     private let healthStore = HKHealthStore()
+    private let kInstallDateKey = "AppInstallDate"
     
-    // 読み書きしたいデータの種類を定義
-    // 今回は「歩数(読む)」「体重(読む/書く)」「距離(読む)」などを想定
+    // 読み書きデータの定義
     private let readTypes: Set<HKObjectType> = [
         HKObjectType.quantityType(forIdentifier: .stepCount)!,
         HKObjectType.quantityType(forIdentifier: .distanceWalkingRunning)!,
@@ -35,19 +33,33 @@ class HealthKitManager: ObservableObject {
         HKObjectType.quantityType(forIdentifier: .bodyMass)!
     ]
     
-    // 初期化時に権限リクエストを行う（または画面表示時に呼ぶ）
-    func requestAuthorization() {
-        // HealthKitが利用可能かチェック
-        guard HKHealthStore.isHealthDataAvailable() else {
-            print("HealthKit is not available on this device.")
-            return
+    // MARK: - インストール日の管理
+    
+    /// アプリのインストール日（初回起動日）を取得。
+    /// ★開発用修正: データが途切れないよう、初回保存時に「7日前」として保存する
+    private var installDate: Date {
+        let defaults = UserDefaults.standard
+        if let date = defaults.object(forKey: kInstallDateKey) as? Date {
+            return date
+        } else {
+            // ここで「今日」ではなく「7日前」を起点にする
+            let now = Date()
+            let sevenDaysAgo = Calendar.current.date(byAdding: .day, value: -7, to: now)!
+            defaults.set(sevenDaysAgo, forKey: kInstallDateKey)
+            print("【System】初回起動日をセット(7日前): \(sevenDaysAgo)")
+            return sevenDaysAgo
         }
+    }
+    
+    // MARK: - 認証・初期化
+    
+    func requestAuthorization() {
+        guard HKHealthStore.isHealthDataAvailable() else { return }
         
         healthStore.requestAuthorization(toShare: shareTypes, read: readTypes) { [weak self] success, error in
             DispatchQueue.main.async {
                 if success {
                     self?.isAuthorized = true
-                    // 許可されたらデータを取得する
                     self?.fetchAllData()
                 } else {
                     print("Authorization failed: \(String(describing: error))")
@@ -56,110 +68,111 @@ class HealthKitManager: ObservableObject {
         }
     }
     
-    // データ更新を一括で行う
     func fetchAllData() {
         fetchTodayStepCount()
         fetchTodayDistance()
         fetchTodayCalories()
+        
+        // インストール日（実質7日前）の0:00から取得
+        let startOfInstallDate = Calendar.current.startOfDay(for: self.installDate)
+        fetchCumulativeSteps(from: startOfInstallDate)
     }
     
-    // 今日の歩数を取得する関数
+    // MARK: - 今日のデータ取得
+    
     func fetchTodayStepCount() {
         guard let stepType = HKQuantityType.quantityType(forIdentifier: .stepCount) else { return }
-        
-        // 今日の0:00を基準にする
-        let calendar = Calendar.current
         let now = Date()
-        let startOfDay = calendar.startOfDay(for: now)
-        
-        // 検索条件: 今日の0:00 〜 現在
+        let startOfDay = Calendar.current.startOfDay(for: now)
         let predicate = HKQuery.predicateForSamples(withStart: startOfDay, end: now, options: .strictStartDate)
         
-        // クエリを作成 (StatisticsQueryを使うと合計計算が楽)
         let query = HKStatisticsQuery(quantityType: stepType, quantitySamplePredicate: predicate, options: .cumulativeSum) { _, result, error in
+            // エラー時は何もしない（前の値をキープ）
+            if error != nil { return }
+            guard let result = result, let sum = result.sumQuantity() else { return }
             
-            guard let result = result, let sum = result.sumQuantity() else {
-                print("歩数データの取得に失敗、またはデータなし")
-                return
-            }
-            
-            // 取得した値を「歩(count)」単位のDoubleとして取り出す
-            let steps = sum.doubleValue(for: HKUnit.count())
-            
-            // UIの更新はメインスレッドで行う
-            DispatchQueue.main.async {
-                self.stepCount = steps
-                print("今日の歩数: \(steps)")
-            }
+            let steps = sum.doubleValue(for: .count())
+            DispatchQueue.main.async { self.stepCount = steps }
         }
         healthStore.execute(query)
     }
-    // 歩行距離を取得
+    
     func fetchTodayDistance() {
         guard let distanceType = HKQuantityType.quantityType(forIdentifier: .distanceWalkingRunning) else { return }
-        
-        let calendar = Calendar.current
         let now = Date()
-        let startOfDay = calendar.startOfDay(for: now)
-        
+        let startOfDay = Calendar.current.startOfDay(for: now)
         let predicate = HKQuery.predicateForSamples(withStart: startOfDay, end: now, options: .strictStartDate)
         
         let query = HKStatisticsQuery(quantityType: distanceType, quantitySamplePredicate: predicate, options: .cumulativeSum) { _, result, error in
+            if error != nil { return }
+            guard let result = result, let sum = result.sumQuantity() else { return }
             
-            guard let result = result, let sum = result.sumQuantity() else {
-                print("距離データの取得に失敗、またはデータなし")
-                return
-            }
-            
-            // 距離をメートル単位で取得
-            let distance = sum.doubleValue(for: HKUnit.meter())
-            
-            DispatchQueue.main.async {
-                self.walkingDistance = distance
-                print("今日の距離: \(distance) m")
-            }
+            let dist = sum.doubleValue(for: .meter())
+            DispatchQueue.main.async { self.walkingDistance = dist }
         }
-        
         healthStore.execute(query)
     }
     
     func fetchTodayCalories() {
-        guard let calorieType = HKQuantityType.quantityType(forIdentifier: .activeEnergyBurned) else {return}
-        
-        let calendar = Calendar.current
+        guard let calorieType = HKQuantityType.quantityType(forIdentifier: .activeEnergyBurned) else { return }
         let now = Date()
-        let startOfDay = calendar.startOfDay(for: now)
+        let startOfDay = Calendar.current.startOfDay(for: now)
         let predicate = HKQuery.predicateForSamples(withStart: startOfDay, end: now, options: .strictStartDate)
         
         let query = HKStatisticsQuery(quantityType: calorieType, quantitySamplePredicate: predicate, options: .cumulativeSum) { _, result, error in
-            guard let result = result, let sum = result.sumQuantity() else {
-                print("カロリーデータの取得に失敗、またはデータなし")
-                return
-            }
-            //単位をキロカロリーで取得
-            let kcal = sum.doubleValue(for: HKUnit.kilocalorie())
+            if error != nil { return }
+            guard let result = result, let sum = result.sumQuantity() else { return }
             
-            DispatchQueue.main.async {
-                self.calories = kcal
-            }
+            let cal = sum.doubleValue(for: .kilocalorie())
+            DispatchQueue.main.async { self.calories = cal }
         }
-        
         healthStore.execute(query)
     }
     
-    func fetchHistory(days: Int, completion: @escaping ([DailyActivity]) -> Void) {
-        guard let stepType = HKQuantityType.quantityType(forIdentifier: .stepCount),
-              let distanceType = HKQuantityType.quantityType(forIdentifier: .distanceWalkingRunning),
-              let calorieType = HKQuantityType.quantityType(forIdentifier: .activeEnergyBurned) else { return }
+    // MARK: - 累計データ取得 (修正版)
+    
+    func fetchCumulativeSteps(from startDate: Date) {
+        guard let stepType = HKQuantityType.quantityType(forIdentifier: .stepCount) else { return }
         
+        let now = Date()
+        let predicate = HKQuery.predicateForSamples(withStart: startDate, end: now, options: .strictStartDate)
+        
+        let query = HKStatisticsQuery(quantityType: stepType, quantitySamplePredicate: predicate, options: .cumulativeSum) { _, result, error in
+            
+            // ★修正1: エラーが出たら「0」にせず、リターンして無視する（画面の数字を消さない）
+            if let error = error {
+                print("累計取得エラー(無視): \(error.localizedDescription)")
+                return
+            }
+            
+            // データ自体がない場合は仕方ないので無視、あるいは0にする
+            // ここでは念の為無視する（前のデータを残す）
+            guard let result = result, let sum = result.sumQuantity() else {
+                return
+            }
+            
+            let totalSteps = sum.doubleValue(for: .count())
+            
+            DispatchQueue.main.async {
+                self.cumulativeSteps = totalSteps
+                // デバッグログ: 開始日時をJSTで確認しやすいように出力
+                let formatter = DateFormatter()
+                formatter.dateFormat = "yyyy/MM/dd HH:mm"
+                print("累計歩数更新: \(Int(totalSteps))歩 (集計開始: \(formatter.string(from: startDate)))")
+            }
+        }
+        healthStore.execute(query)
+    }
+    
+    // MARK: - 履歴・その他
+    
+    func fetchHistory(days: Int, completion: @escaping ([DailyActivity]) -> Void) {
+        guard let stepType = HKQuantityType.quantityType(forIdentifier: .stepCount) else { return }
         let now = Date()
         let calendar = Calendar.current
         let startDate = calendar.date(byAdding: .day, value: -days + 1, to: calendar.startOfDay(for: now))!
-        
-        // 1日ごとの統計を取るための設定
         let interval = DateComponents(day: 1)
         
-        // 歩数の集計
         let stepQuery = HKStatisticsCollectionQuery(
             quantityType: stepType,
             quantitySamplePredicate: nil,
@@ -169,60 +182,33 @@ class HealthKitManager: ObservableObject {
         )
         
         stepQuery.initialResultsHandler = { _, results, error in
-            var tempActivities: [DailyActivity] = []
+            if error != nil { return }
             
+            var tempActivities: [DailyActivity] = []
             results?.enumerateStatistics(from: startDate, to: now) { statistics, _ in
                 let date = statistics.startDate
                 let steps = statistics.sumQuantity()?.doubleValue(for: .count()) ?? 0
-                
-                // 本来は距離とカロリーも同様にCollectionQueryを投げますが、
-                // コードを簡潔にするため、ここでは歩数をベースにモックデータを入れるか、
-                // 同様のクエリを複数投げて合成します。
-                // 今回は「歩数」の取得フローをメインに示します。
-                
-                let activity = DailyActivity(
-                    date: date,
-                    steps: steps,
-                    distance: steps * 0.7, // 仮の計算式（後で正確な値を合成）
-                    calories: steps * 0.04  // 仮の計算式（後で正確な値を合成）
-                )
+                let activity = DailyActivity(date: date, steps: steps, distance: steps * 0.7, calories: steps * 0.04)
                 tempActivities.append(activity)
             }
-            
-            DispatchQueue.main.async {
-                // 新しい順（今日が一番上）に並び替えて返す
-                completion(tempActivities.reversed())
-            }
+            DispatchQueue.main.async { completion(tempActivities.reversed()) }
         }
-        
         healthStore.execute(stepQuery)
     }
     
-    // 指定した期間の累計歩数を取得する
-    func fetchCumulativeSteps(from startDate: Date) {
-        guard let stepType = HKQuantityType.quantityType(forIdentifier: .stepCount) else { return }
-        
-        let now = Date()
-        
-        // 期間指定
-        let predicate = HKQuery.predicateForSamples(withStart: startDate, end: now, options: .strictStartDate)
+    // デバッグ用
+    func fetchSteps(for date: Date, completion: @escaping (Int) -> Void) {
+        guard let stepType = HKQuantityType.quantityType(forIdentifier: .stepCount) else {
+            completion(0); return
+        }
+        let start = Calendar.current.startOfDay(for: date)
+        let end = Calendar.current.date(byAdding: .day, value: 1, to: start)!
+        let predicate = HKQuery.predicateForSamples(withStart: start, end: end, options: .strictStartDate)
         
         let query = HKStatisticsQuery(quantityType: stepType, quantitySamplePredicate: predicate, options: .cumulativeSum) { _, result, error in
-            
-            guard let result = result, let sum = result.sumQuantity() else {
-                print("累計データの取得失敗: \(String(describing: error))")
-                return
-            }
-            
-            let totalSteps = sum.doubleValue(for: HKUnit.count())
-            
-            // 呼び出し元に返すために、NotificationCenterを使うか、
-            // ここでは簡易的にUserLevelManagerに渡す設計にするのが綺麗ですが、
-            // 今回は @Published 変数を用意してHomeViewで監視させます。
-            
-            DispatchQueue.main.async {
-                self.cumulativeSteps = totalSteps
-            }
+            if error != nil { completion(0); return }
+            let steps = Int(result?.sumQuantity()?.doubleValue(for: .count()) ?? 0)
+            DispatchQueue.main.async { completion(steps) }
         }
         healthStore.execute(query)
     }
