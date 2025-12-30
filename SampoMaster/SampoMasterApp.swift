@@ -21,15 +21,11 @@ struct SampoMasterApp: App {
         WindowGroup {
             if isLoading {
                 // 起動画面を表示
-                SplashView()
-                    .onAppear {
-                        // 5秒後にメイン画面へ切り替え
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 5.0) {
-                            withAnimation(.easeInOut(duration: 0.5)) {
-                                isLoading = false
-                            }
-                        }
+                SplashView(onStart: {
+                    withAnimation(.easeIn(duration: 0.5)) {
+                    isLoading = false
                     }
+                })
             } else {
                 // メイン画面（ContentView）を表示
                 ContentView()
